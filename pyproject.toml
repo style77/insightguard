@@ -1,0 +1,81 @@
+[tool.poetry]
+name = "insightguard"
+version = "0.1.0"
+description = ""
+authors = [
+
+]
+maintainers = [
+
+]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.89.1"
+uvicorn = { version = "^0.20.0", extras = ["standard"] }
+pydantic = {version = "^1.10.4", extras = ["dotenv"]}
+yarl = "^1.8.2"
+ujson = "^5.7.0"
+SQLAlchemy = {version = "^2.0.0", extras = ["asyncio"]}
+alembic = "^1.9.2"
+asyncpg = {version = "^0.27.0", extras = ["sa"]}
+redis = {version = "^4.4.2", extras = ["hiredis"]}
+httptools = "^0.5.0"
+prometheus-client = "^0.16.0"
+prometheus-fastapi-instrumentator = "5.9.1"
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.2.1"
+flake8 = "~4.0.1"
+mypy = "^0.991"
+isort = "^5.11.4"
+pre-commit = "^3.0.1"
+wemake-python-styleguide = "^0.17.0"
+black = "^22.12.0"
+autoflake = "^1.6.1"
+pytest-cov = "^4.0.0"
+anyio = "^3.6.2"
+pytest-env = "^0.8.1"
+fakeredis = "^2.5.0"
+httpx = "^0.23.3"
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+src_paths = ["insightguard",]
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+allow_subclassing_any = true
+allow_untyped_calls = true
+pretty = true
+show_error_codes = true
+implicit_reexport = true
+allow_untyped_decorators = true
+warn_unused_ignores = false
+warn_return_any = false
+namespace_packages = true
+
+# Remove this and add `types-redis`
+# when the issue https://github.com/python/typeshed/issues/8242 is resolved.
+[[tool.mypy.overrides]]
+module = [
+    'redis.asyncio'
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning",
+    "ignore:.*unclosed.*:ResourceWarning",
+]
+env = [
+    "INSIGHTGUARD_DB_BASE=insightguard_test",
+]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

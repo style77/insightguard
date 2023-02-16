@@ -1,0 +1,71 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./deploy/Dockerfile
+    image: insightguard:${INSIGHTGUARD_VERSION:-latest}
+    restart: always
+    env_file:
+    - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      INSIGHTGUARD_HOST: 0.0.0.0
+      INSIGHTGUARD_DB_HOST: insightguard-db
+      INSIGHTGUARD_DB_PORT: 5432
+      INSIGHTGUARD_DB_USER: insightguard
+      INSIGHTGUARD_DB_PASS: insightguard
+      INSIGHTGUARD_DB_BASE: insightguard
+
+  db:
+    image: postgres:13.8-bullseye
+    hostname: insightguard-db
+    environment:
+      POSTGRES_PASSWORD: "insightguard"
+      POSTGRES_USER: "insightguard"
+      POSTGRES_DB: "insightguard"
+    volumes:
+    - insightguard-db-data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: pg_isready -U insightguard
+      interval: 2s
+      timeout: 3s
+      retries: 40
+
+  migrator:
+    image: insightguard:${INSIGHTGUARD_VERSION:-latest}
+    restart: "no"
+    command: alembic upgrade head
+    environment:
+      INSIGHTGUARD_DB_HOST: insightguard-db
+      INSIGHTGUARD_DB_PORT: 5432
+      INSIGHTGUARD_DB_USER: insightguard
+      INSIGHTGUARD_DB_PASS: insightguard
+      INSIGHTGUARD_DB_BASE: insightguard
+    depends_on:
+      db:
+        condition: service_healthy
+
+  redis:
+    image: bitnami/redis:6.2.5
+    hostname: "insightguard-redis"
+    restart: always
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+    healthcheck:
+      test: redis-cli ping
+      interval: 1s
+      timeout: 3s
+      retries: 50
+
+
+
+volumes:
+  insightguard-db-data:
+    name: insightguard-db-data
