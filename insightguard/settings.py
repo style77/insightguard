@@ -1,4 +1,5 @@
 import enum
+import os
 from pathlib import Path
 from tempfile import gettempdir
 from typing import Optional
@@ -58,6 +59,10 @@ class Settings(BaseSettings):
     # This variable is used to define
     # multiproc_dir. It's required for [uvi|guni]corn projects.
     prometheus_dir: Path = TEMP_DIR / "prom"
+
+    # JWT settings
+    jwt_secret_key: str = "test"
+    jwt_refresh_secret_key: str = "test"
 
     @property
     def db_url(self) -> URL:

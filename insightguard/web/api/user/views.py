@@ -1,41 +1,50 @@
 from typing import List
 
-from fastapi import APIRouter
+from fastapi import HTTPException, APIRouter
 from fastapi.param_functions import Depends
 
-from insightguard.db.dao.user_dao import DummyDAO
-from insightguard.db.models.user_model import DummyModel
-from insightguard.web.api.dummy.schema import DummyModelDTO, DummyModelInputDTO
+from insightguard.db.dao.user_dao import UserDAO
+from insightguard.db.models.user_model import UserModel
+from insightguard.web.api.user.schema import (UserModelDTO, UserModelInputDTO,
+                                              UserModelFetchDTD)
 
 router = APIRouter()
 
 
-@router.get("/", response_model=List[DummyModelDTO])
-async def get_dummy_models(
-    limit: int = 10,
-    offset: int = 0,
-    dummy_dao: DummyDAO = Depends(),
-) -> List[DummyModel]:
+@router.get("/", response_model=List[UserModelDTO])
+async def get_user_model(
+    user: UserModelFetchDTD = Depends(),
+    user_dao: UserDAO = Depends(),
+) -> UserModel:
     """
-    Retrieve all dummy objects from the database.
+    Retrieve user object from the database.
 
-    :param limit: limit of dummy objects, defaults to 10.
-    :param offset: offset of dummy objects, defaults to 0.
-    :param dummy_dao: DAO for dummy models.
-    :return: list of dummy obbjects from database.
+    :param user: user model object.
+    :param user_dao: DAO for user model.
+    :return: list of user objects from database.
     """
-    return await dummy_dao.get_all_dummies(limit=limit, offset=offset)
+    if user.id:
+        return await user_dao.get_user(user.id)
+    elif user.username:
+        return await user_dao.get_user(user.username)
+    elif user.email:
+        return await user_dao.get_user(user.email)
+    else:
+        raise HTTPException(
+            status_code=400,
+            detail="You must specify either id, username or email",
+        )
 
 
 @router.put("/")
-async def create_dummy_model(
-    new_dummy_object: DummyModelInputDTO,
-    dummy_dao: DummyDAO = Depends(),
+async def create_user_model(
+    new_user_object: UserModelInputDTO,
+    user_dao: UserDAO = Depends(),
 ) -> None:
     """
-    Creates dummy model in the database.
+    Creates user model in the database.
 
-    :param new_dummy_object: new dummy model item.
-    :param dummy_dao: DAO for dummy models.
+    :param new_user_object: new user model item.
+    :param user_dao: DAO for user models.
     """
-    await dummy_dao.create_dummy_model(**new_dummy_object.dict())
+    await user_dao.create_user(**new_user_object.dict())

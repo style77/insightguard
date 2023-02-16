@@ -78,7 +78,7 @@ For example if you see in your "insightguard/settings.py" a variable named like
 variable to configure the value. This behaviour can be changed by overriding `env_prefix` property
 in `insightguard.settings.Settings.Config`.
 
-An exmaple of .env file:
+An example of .env file:
 ```bash
 INSIGHTGUARD_RELOAD="True"
 INSIGHTGUARD_PORT="8000"
@@ -86,25 +86,6 @@ INSIGHTGUARD_ENVIRONMENT="dev"
 ```
 
 You can read more about BaseSettings class here: https://pydantic-docs.helpmanual.io/usage/settings/
-
-## Pre-commit
-
-To install pre-commit simply run inside the shell:
-```bash
-pre-commit install
-```
-
-pre-commit is very useful to check your code before publishing it.
-It's configured using .pre-commit-config.yaml file.
-
-By default it runs:
-* black (formats your code);
-* mypy (validates types);
-* isort (sorts imports in all files);
-* flake8 (spots possibe bugs);
-
-
-You can read more about pre-commit here: https://pre-commit.com/
 
 ## Migrations
 
@@ -156,7 +137,6 @@ I prefer doing it with docker:
 ```
 docker run -p "5432:5432" -e "POSTGRES_PASSWORD=insightguard" -e "POSTGRES_USER=insightguard" -e "POSTGRES_DB=insightguard" postgres:13.8-bullseye
 ```
-
 
 2. Run the pytest.
 ```bash

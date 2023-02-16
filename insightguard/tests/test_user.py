@@ -17,17 +17,22 @@ async def test_creation(
 ) -> None:
     """Tests user instance creation."""
     url = fastapi_app.url_path_for("create_user_model")
-    test_name = uuid.uuid4().hex
+    test_username = uuid.uuid4().hex
+    test_password = uuid.uuid4().hex
+    test_email = uuid.uuid4().hex + "@test.com"
     response = await client.put(
         url,
         json={
-            "name": test_name,
+            "username": test_username,
+            "password": test_password,
+            "email": test_email,
         },
     )
     assert response.status_code == status.HTTP_200_OK
+    test_user_id = response.json()["id"]
     dao = UserDAO(dbsession)
-    instances = await dao.filter(name=test_name)
-    assert instances[0].name == test_name
+    instances = await dao.get_user(test_user_id)
+    assert instances.username == test_username
 
 
 @pytest.mark.anyio
@@ -38,14 +43,14 @@ async def test_getting(
 ) -> None:
     """Tests user instance retrieval."""
     dao = UserDAO(dbsession)
-    test_name = uuid.uuid4().hex
+    test_username = uuid.uuid4().hex
     test_password = uuid.uuid4().hex
     test_email = uuid.uuid4().hex + "@test.com"
-    await dao.create_user(username=test_name, password=test_password, email=test_email)
-    url = fastapi_app.url_path_for("get_dummy_models")
+    await dao.create_user(username=test_username, password=test_password,
+                          email=test_email)
+    url = fastapi_app.url_path_for("get_user")
     response = await client.get(url)
-    dummies = response.json()
+    user = response.json()
 
     assert response.status_code == status.HTTP_200_OK
-    assert len(dummies) == 1
-    assert dummies[0]["name"] == test_name
+    assert user["username"] == test_username

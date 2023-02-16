@@ -1,4 +1,4 @@
 """Dummy model API."""
-from insightguard.web.api.dummy.views import router
+from insightguard.web.api.user.views import router
 
 __all__ = ["router"]
