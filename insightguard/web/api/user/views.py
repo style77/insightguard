@@ -1,10 +1,14 @@
+import typing
+import uuid
 from typing import List
 
 from fastapi import HTTPException, APIRouter
 from fastapi.param_functions import Depends
 from starlette import status
 
+from insightguard.db.dao.key_dao import KeyDAO
 from insightguard.db.dao.user_dao import UserDAO
+from insightguard.web.api.key.schema import KeyModelDTD
 from insightguard.web.api.user.schema import (UserModelInputDTO,
                                               UserModelFetchDTD, UserModelDTD,
                                               JWTTokenDTD,
@@ -69,3 +73,9 @@ async def authorize_user(
     :return: JWT tokens for user.
     """
     return await user_dao.authorize_user(user.user_context, user.password)
+
+
+@router.get("/keys", response_model=list[KeyModelDTD])
+async def get_user_keys(user_id: uuid.UUID, key_dao: KeyDAO = Depends()):
+    keys = await key_dao.get_user_keys(user_id)
+    return keys

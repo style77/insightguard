@@ -1,9 +1,10 @@
 import uuid
+from datetime import datetime
 from typing import Literal
 
 import sqlalchemy
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.sql.sqltypes import String, UUID, Boolean
+from sqlalchemy.sql.sqltypes import String, UUID, Boolean, DateTime
 
 from insightguard.db.base import Base
 
@@ -16,6 +17,7 @@ class UserModel(Base):
     __tablename__ = "user"
 
     id: Mapped[uuid] = mapped_column(UUID(), primary_key=True, default=uuid.uuid4)
+    created_at: Mapped[datetime] = mapped_column(DateTime(), default=datetime.utcnow)
     username: Mapped[str] = mapped_column(String(length=200), nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(), nullable=False)
     email: Mapped[str] = mapped_column(String(length=200), nullable=False)
