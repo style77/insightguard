@@ -5,9 +5,10 @@ from fastapi.param_functions import Depends
 from starlette import status
 
 from insightguard.db.dao.user_dao import UserDAO
-from insightguard.db.models.user_model import UserModel
 from insightguard.web.api.user.schema import (UserModelInputDTO,
-                                              UserModelFetchDTD, UserModelDTD)
+                                              UserModelFetchDTD, UserModelDTD,
+                                              JWTTokenDTD,
+                                              AuthorizeInputDTD)
 
 router = APIRouter()
 
@@ -22,7 +23,7 @@ async def get_user_model(
 
     :param user: user model object.
     :param user_dao: DAO for user model.
-    :return: list of user objects from database.
+    :return: user object from database.
     """
     if user.id:
         user_context = user.id
@@ -53,3 +54,18 @@ async def create_user_model(
     :param user_dao: DAO for user models.
     """
     await user_dao.create_user(**new_user_object.dict())
+
+
+@router.post("/authorize", response_model=JWTTokenDTD)
+async def authorize_user(
+    user: AuthorizeInputDTD,
+    user_dao: UserDAO = Depends()
+) -> JWTTokenDTD:
+    """
+    Authorize user and returns JWT token for user.
+
+    :param user: username or email of a user.
+    :param user_dao: DAO for user models.
+    :return: JWT tokens for user.
+    """
+    return await user_dao.authorize_user(user.user_context, user.password)

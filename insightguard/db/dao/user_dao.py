@@ -19,7 +19,7 @@ from passlib.context import CryptContext
 from jose import jwt
 
 from insightguard.settings import settings
-from insightguard.web.api.user.schema import UserModelFetchDTD, UserModelDTD
+from insightguard.web.api.user.schema import UserModelFetchDTD, UserModelDTD, JWTTokenDTD
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
 REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
@@ -128,43 +128,6 @@ class UserDAO:
             UserModel(username=username, hashed_password=hashed_password, email=email,
                       full_name=full_name, company=company))
 
-    async def authorize_user(self, user_context: str, password: str) -> dict:
-        """
-        Authorize user and returns JWT token for user.
-
-        :param user_context: username or email of a user.
-        :param password: password of a user.
-        :return: True if user is authorized, False otherwise.
-        """
-
-        if '@' in user_context:
-            query = select(UserModel).where(
-                UserModel.email == user_context)
-        else:
-            query = select(UserModel).where(
-                UserModel.username == user_context)
-
-        user = await self.session.execute(query)
-
-        if not user.scalar():
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User with this username or email doesn't exists",
-            )
-
-        user = user.scalars().one()
-
-        if not Hasher.verify_password(password, user.hashed_password):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Incorrect password"
-            )
-
-        return dict(
-            access_token=JWT.create_access_token(user.id),
-            refresh_token=JWT.create_refresh_token(user.id)
-        )
-
     async def get_user(
         self,
         user_context: str = None,
@@ -190,3 +153,39 @@ class UserDAO:
                 detail="User doesn't exists",
             )
         return UserModelDTD.from_orm(user)
+
+    async def authorize_user(self, user_context: str, password: str) -> JWTTokenDTD:
+        """
+        Authorize user and returns JWT token for user.
+
+        :param user_context: username or email of a user.
+        :param password: password of a user.
+        :return: True if user is authorized, False otherwise.
+        """
+
+        if '@' in user_context:
+            query = select(UserModel).where(
+                UserModel.email == user_context)
+        else:
+            query = select(UserModel).where(
+                UserModel.username == user_context)
+
+        user = await self.session.execute(query)
+        user = user.scalar()
+
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User with this username or email doesn't exists",
+            )
+
+        if not Hasher.verify_password(password, user.hashed_password):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Incorrect password"
+            )
+
+        return JWTTokenDTD(
+            access_token=JWT.create_access_token(user.id),
+            refresh_token=JWT.create_refresh_token(user.id)
+        )

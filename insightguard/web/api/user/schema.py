@@ -38,7 +38,15 @@ class UserModelDTD(BaseModel):
     class Config:
         orm_mode = True
 
-class JWTToken(BaseModel):
+
+class AuthorizeInputDTD(BaseModel):
+    """DTO for authorizing user."""
+
+    user_context: str
+    password: str
+
+
+class JWTTokenDTD(BaseModel):
     """JWT token model."""
 
     access_token: str
