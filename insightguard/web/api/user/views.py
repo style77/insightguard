@@ -2,20 +2,21 @@ from typing import List
 
 from fastapi import HTTPException, APIRouter
 from fastapi.param_functions import Depends
+from starlette import status
 
 from insightguard.db.dao.user_dao import UserDAO
 from insightguard.db.models.user_model import UserModel
-from insightguard.web.api.user.schema import (UserModelDTO, UserModelInputDTO,
-                                              UserModelFetchDTD)
+from insightguard.web.api.user.schema import (UserModelInputDTO,
+                                              UserModelFetchDTD, UserModelDTD)
 
 router = APIRouter()
 
 
-@router.get("/", response_model=List[UserModelDTO])
+@router.get("/", response_model=UserModelDTD)
 async def get_user_model(
     user: UserModelFetchDTD = Depends(),
-    user_dao: UserDAO = Depends(),
-) -> UserModel:
+    user_dao: UserDAO = Depends()
+) -> UserModelDTD:
     """
     Retrieve user object from the database.
 
@@ -24,16 +25,20 @@ async def get_user_model(
     :return: list of user objects from database.
     """
     if user.id:
-        return await user_dao.get_user(user.id)
+        user_context = user.id
     elif user.username:
-        return await user_dao.get_user(user.username)
+        user_context = user.username
     elif user.email:
-        return await user_dao.get_user(user.email)
+        user_context = user.email
     else:
         raise HTTPException(
-            status_code=400,
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail="You must specify either id, username or email",
         )
+
+    user = await user_dao.get_user(user_context)
+
+    return user
 
 
 @router.put("/")

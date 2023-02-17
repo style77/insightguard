@@ -1,23 +1,7 @@
 import typing
+import uuid
 
 from pydantic import BaseModel
-
-
-class UserModelDTO(BaseModel):
-    """
-    DTO for user models.
-
-    It returned when accessing user models from the API.
-    """
-
-    id: int
-    name: str
-    email: str
-    full_name: typing.Optional[str] = None
-    company: typing.Optional[str] = None
-
-    class Config:
-        orm_mode = True
 
 
 class UserModelInputDTO(BaseModel):
@@ -34,9 +18,29 @@ class UserModelInputDTO(BaseModel):
 class UserModelFetchDTD(BaseModel):
     """DTO for fetching user models."""
 
-    id: typing.Optional[str] = None
+    id: typing.Optional[uuid.UUID] = None
     username: typing.Optional[str] = None
     email: typing.Optional[str] = None
 
     class Config:
         orm_mode = True
+
+
+class UserModelDTD(BaseModel):
+    """DTO for fetching user models."""
+
+    id: uuid.UUID
+    username: str
+    email: str
+    full_name: typing.Optional[str] = None
+    company: typing.Optional[str] = None
+
+    class Config:
+        orm_mode = True
+
+class JWTToken(BaseModel):
+    """JWT token model."""
+
+    access_token: str
+    refresh_token: str
+

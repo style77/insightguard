@@ -7,7 +7,7 @@ from uuid import UUID
 
 from fastapi import Depends
 from fastapi import HTTPException
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
@@ -19,6 +19,7 @@ from passlib.context import CryptContext
 from jose import jwt
 
 from insightguard.settings import settings
+from insightguard.web.api.user.schema import UserModelFetchDTD, UserModelDTD
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
 REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
@@ -53,6 +54,7 @@ def is_valid_uuid(uuid_to_test, version=4):
     except ValueError:
         return False
     return str(uuid_obj) == uuid_to_test
+
 
 class JWT:
     @staticmethod
@@ -108,10 +110,13 @@ class UserDAO:
 
         # check if user with same username or email exists
         query = select(UserModel).where(
-            UserModel.username == username or UserModel.email == email)
-        rows = await self.session.execute(query)
-        user = rows.scalars().one()
-        if user:
+            or_(UserModel.username == username,
+                UserModel.email == email)
+        )
+
+        exists = await self.session.execute(query)
+
+        if exists.scalar():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User with same username or email already exists",
@@ -133,18 +138,21 @@ class UserDAO:
         """
 
         if '@' in user_context:
-            query = select(UserModel).where(UserModel.email == user_context)
+            query = select(UserModel).where(
+                UserModel.email == user_context)
         else:
-            query = select(UserModel).where(UserModel.username == user_context)
+            query = select(UserModel).where(
+                UserModel.username == user_context)
 
-        rows = await self.session.execute(query)
-        user = rows.scalars().one()
+        user = await self.session.execute(query)
 
-        if not user:
+        if not user.scalar():
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User with this username or email doesn't exists",
             )
+
+        user = user.scalars().one()
 
         if not Hasher.verify_password(password, user.hashed_password):
             raise HTTPException(
@@ -160,7 +168,7 @@ class UserDAO:
     async def get_user(
         self,
         user_context: str = None,
-    ) -> UserModel:
+    ) -> UserModelDTD:
         """
         Get specific user model.
 
@@ -174,10 +182,11 @@ class UserDAO:
         else:
             query = select(UserModel).where(UserModel.username == user_context)
 
-        rows = await self.session.execute(query)
-        if not rows.scalar():
+        user = await self.session.execute(query)
+        user = user.scalar()
+        if not user:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User doesn't exists",
             )
-        return rows.scalars().one()
+        return UserModelDTD.from_orm(user)
