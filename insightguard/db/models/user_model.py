@@ -16,7 +16,7 @@ class UserModel(Base):
 
     __tablename__ = "user"
 
-    id: Mapped[uuid] = mapped_column(UUID(), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(UUID(), primary_key=True, default=uuid.uuid4)
     created_at: Mapped[datetime] = mapped_column(DateTime(), default=datetime.utcnow)
     username: Mapped[str] = mapped_column(String(length=200), nullable=False)
     hashed_password: Mapped[str] = mapped_column(String(), nullable=False)
