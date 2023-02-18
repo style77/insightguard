@@ -1,6 +1,10 @@
 # insightguard
 
-This project was generated using fastapi_template.
+InsightGuard is a simple API, that can be used to predict if message is considered as cyber bullying or not. \
+Models are trained in 5 languages: English, Polish, Japanese, Spanish, Catalan. \
+Project is easily scalable to perform predictions in other languages, and to create new features.
+
+Project structure was generated using awesome [fastapi_template](https://github.com/s3rius/FastAPI-template/).
 
 ## Poetry
 
@@ -43,27 +47,6 @@ But you have to rebuild image every time you modify `poetry.lock` or `pyproject.
 docker-compose -f deploy/docker-compose.yml --project-directory . build
 ```
 
-## Project structure
-
-```bash
-$ tree "insightguard"
-insightguard
-├── conftest.py  # Fixtures for all tests.
-├── db  # module contains db configurations
-│   ├── dao  # Data Access Objects. Contains different classes to interact with database.
-│   └── models  # Package contains different models for ORMs.
-├── __main__.py  # Startup script. Starts uvicorn.
-├── services  # Package for different external services such as rabbit or redis etc.
-├── settings.py  # Main configuration settings for project.
-├── static  # Static content.
-├── tests  # Tests for project.
-└── web  # Package contains web server. Handlers, startup config.
-    ├── api  # Package with all handlers.
-    │   └── router.py  # Main router.
-    ├── application.py  # FastAPI application configuration.
-    └── lifetime.py  # Contains actions to perform on startup and shutdown.
-```
-
 ## Configuration
 
 This application can be configured with environment variables.
@@ -83,6 +66,9 @@ An example of .env file:
 INSIGHTGUARD_RELOAD="True"
 INSIGHTGUARD_PORT="8000"
 INSIGHTGUARD_ENVIRONMENT="dev"
+
+INSIGHTGUARD_JWT_SECRET_KEY="secret_key"
+INSIGHTGUARD_JWT_REFRESH_SECRET_KEY="refresh_token"
 ```
 
 You can read more about BaseSettings class here: https://pydantic-docs.helpmanual.io/usage/settings/
