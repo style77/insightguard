@@ -19,7 +19,8 @@ from passlib.context import CryptContext
 from jose import jwt
 
 from insightguard.settings import settings
-from insightguard.web.api.user.schema import UserModelFetchDTD, UserModelDTD, JWTTokenDTD
+from insightguard.web.api.user.schema import (UserModelFetchDTD, UserModelDTD,
+                                              JWTTokenDTD)
 
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
 REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days

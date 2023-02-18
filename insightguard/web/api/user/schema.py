@@ -39,10 +39,19 @@ class UserModelDTD(BaseModel):
         orm_mode = True
 
 
+class SystemUser(UserModelDTD):
+    """System user model."""
+
+    password: str
+
+    class Config:
+        orm_mode = True
+
+
 class AuthorizeInputDTD(BaseModel):
     """DTO for authorizing user."""
 
-    user_context: str
+    username: str
     password: str
 
 

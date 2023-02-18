@@ -12,37 +12,24 @@ from insightguard.web.api.key.schema import KeyModelDTD
 from insightguard.web.api.user.schema import (UserModelInputDTO,
                                               UserModelFetchDTD, UserModelDTD,
                                               JWTTokenDTD,
-                                              AuthorizeInputDTD)
+                                              AuthorizeInputDTD, SystemUser)
+from insightguard.web.dependencies import get_current_user
 
 router = APIRouter()
 
 
 @router.get("/", response_model=UserModelDTD)
-async def get_user_model(
-    user: UserModelFetchDTD = Depends(),
+async def me(
+    user: SystemUser = Depends(get_current_user),
     user_dao: UserDAO = Depends()
 ) -> UserModelDTD:
     """
-    Retrieve user object from the database.
+    Retrieve current user object from the database.
 
     :param user: user model object.
     :param user_dao: DAO for user model.
     :return: user object from database.
     """
-    if user.id:
-        user_context = user.id
-    elif user.username:
-        user_context = user.username
-    elif user.email:
-        user_context = user.email
-    else:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="You must specify either id, username or email",
-        )
-
-    user = await user_dao.get_user(user_context)
-
     return user
 
 
@@ -68,14 +55,16 @@ async def authorize_user(
     """
     Authorize user and returns JWT token for user.
 
-    :param user: username or email of a user.
+    :param user: username
     :param user_dao: DAO for user models.
     :return: JWT tokens for user.
     """
-    return await user_dao.authorize_user(user.user_context, user.password)
+    jwt = await user_dao.authorize_user(user.username, user.password)
+    return jwt
 
 
 @router.get("/keys", response_model=list[KeyModelDTD])
-async def get_user_keys(user_id: uuid.UUID, key_dao: KeyDAO = Depends()):
-    keys = await key_dao.get_user_keys(user_id)
+async def get_user_keys(user: SystemUser = Depends(get_current_user),
+                        key_dao: KeyDAO = Depends()) -> List[KeyModelDTD]:
+    keys = await key_dao.get_user_keys(user.id)
     return keys
