@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from fastapi import HTTPException, Depends
-from fastapi.security import HTTPBearer
+from fastapi.security import HTTPBearer, OAuth2PasswordBearer
 from jose import jwt
 from pydantic import ValidationError
 from starlette import status
@@ -12,7 +12,7 @@ from insightguard.settings import settings
 from insightguard.web.api.schema import TokenPayload
 from insightguard.web.api.user.schema import UserModelDTD
 
-oauth2_scheme = HTTPBearer(scheme_name="JWT")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/user/authorize")
 
 
 async def get_current_user(

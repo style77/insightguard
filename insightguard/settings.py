@@ -63,6 +63,9 @@ class Settings(BaseSettings):
     # JWT settings
     jwt_secret_key: str = "test"
     jwt_refresh_secret_key: str = "test"
+    jwt_algorithm: str = "HS256"
+    refresh_token_expire_minutes: int = 60 * 24 * 7
+    access_token_expire_minutes: int = 30
 
     @property
     def db_url(self) -> URL:

@@ -22,12 +22,6 @@ from insightguard.settings import settings
 from insightguard.web.api.user.schema import (UserModelFetchDTD, UserModelDTD,
                                               JWTTokenDTD)
 
-ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
-REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7 days
-ALGORITHM = "HS256"
-JWT_SECRET_KEY = settings.jwt_secret_key
-JWT_REFRESH_SECRET_KEY = settings.jwt_refresh_secret_key
-
 
 def is_valid_uuid(uuid_to_test, version=4):
     """
@@ -61,19 +55,21 @@ class JWT:
     @staticmethod
     def create_access_token(subject: typing.Union[str, typing.Any]) -> str:
         expires_delta = datetime.utcnow() + timedelta(
-            minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+            minutes=settings.access_token_expire_minutes)
 
         to_encode = {"exp": expires_delta, "sub": str(subject)}
-        encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, ALGORITHM)
+        encoded_jwt = jwt.encode(to_encode, settings.jwt_secret_key,
+                                 settings.jwt_algorithm)
         return encoded_jwt
 
     @staticmethod
     def create_refresh_token(subject: typing.Union[str, typing.Any]) -> str:
         expires_delta = datetime.utcnow() + timedelta(
-            minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
+            minutes=settings.refresh_token_expire_minutes)
 
         to_encode = {"exp": expires_delta, "sub": str(subject)}
-        encoded_jwt = jwt.encode(to_encode, JWT_REFRESH_SECRET_KEY, ALGORITHM)
+        encoded_jwt = jwt.encode(to_encode, settings.jwt_refresh_secret_key,
+                                 settings.jwt_algorithm)
         return encoded_jwt
 
 
@@ -189,4 +185,31 @@ class UserDAO:
         return JWTTokenDTD(
             access_token=JWT.create_access_token(user.id),
             refresh_token=JWT.create_refresh_token(user.id)
+        )
+
+    async def refresh_token(self, refresh_token: str) -> JWTTokenDTD:
+        """
+        Refresh JWT token.
+
+        :param refresh_token: refresh token.
+        :return: JWT token.
+        """
+        try:
+            payload = jwt.decode(refresh_token, settings.jwt_refresh_secret_key,
+                                 algorithms=[settings.jwt_algorithm])
+            user_id: str = payload.get("sub")
+            if user_id is None:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid refresh token"
+                )
+        except jwt.JWTError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid refresh token"
+            )
+
+        return JWTTokenDTD(
+            access_token=JWT.create_access_token(user_id),
+            refresh_token=refresh_token
         )

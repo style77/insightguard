@@ -55,6 +55,12 @@ class AuthorizeInputDTD(BaseModel):
     password: str
 
 
+class JWTTokenInputDTD(BaseModel):
+    """JWT token input model."""
+
+    refresh_token: str
+
+
 class JWTTokenDTD(BaseModel):
     """JWT token model."""
 
