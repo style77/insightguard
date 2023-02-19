@@ -15,7 +15,7 @@ class UserModelInputDTO(BaseModel):
     company: typing.Optional[str] = None
 
 
-class UserModelFetchDTD(BaseModel):
+class UserModelFetchDTO(BaseModel):
     """DTO for fetching user models."""
 
     id: typing.Optional[uuid.UUID] = None
@@ -26,7 +26,7 @@ class UserModelFetchDTD(BaseModel):
         orm_mode = True
 
 
-class UserModelDTD(BaseModel):
+class UserModelDTO(BaseModel):
     """DTO for fetching user models."""
 
     id: uuid.UUID
@@ -39,7 +39,7 @@ class UserModelDTD(BaseModel):
         orm_mode = True
 
 
-class SystemUser(UserModelDTD):
+class SystemUser(UserModelDTO):
     """System user model."""
 
     password: str
@@ -48,14 +48,14 @@ class SystemUser(UserModelDTD):
         orm_mode = True
 
 
-class AuthorizeInputDTD(BaseModel):
+class AuthorizeInputDTO(BaseModel):
     """DTO for authorizing user."""
 
     username: str
     password: str
 
 
-class JWTTokenInputDTD(BaseModel):
+class JWTTokenInputDTO(BaseModel):
     """JWT token input model."""
 
     refresh_token: str

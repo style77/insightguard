@@ -19,7 +19,7 @@ from passlib.context import CryptContext
 from jose import jwt
 
 from insightguard.settings import settings
-from insightguard.web.api.user.schema import (UserModelFetchDTD, UserModelDTD,
+from insightguard.web.api.user.schema import (UserModelFetchDTO, UserModelDTO,
                                               JWTTokenDTD)
 
 
@@ -128,7 +128,7 @@ class UserDAO:
     async def get_user(
         self,
         user_context: str = None,
-    ) -> UserModelDTD:
+    ) -> UserModelDTO:
         """
         Get specific user model.
 
@@ -149,7 +149,7 @@ class UserDAO:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User doesn't exists",
             )
-        return UserModelDTD.from_orm(user)
+        return UserModelDTO.from_orm(user)
 
     async def authorize_user(self, user_context: str, password: str) -> JWTTokenDTD:
         """

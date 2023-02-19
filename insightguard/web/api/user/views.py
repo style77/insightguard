@@ -14,18 +14,18 @@ from insightguard.db.dao.user_dao import UserDAO
 from insightguard.settings import settings
 from insightguard.web.api.key.schema import KeyModelDTD
 from insightguard.web.api.user.schema import (UserModelInputDTO,
-                                              UserModelFetchDTD, UserModelDTD,
+                                              UserModelFetchDTO, UserModelDTO,
                                               JWTTokenDTD,
-                                              AuthorizeInputDTD, SystemUser)
+                                              AuthorizeInputDTO, SystemUser)
 from insightguard.web.dependencies import get_current_user
 
 router = APIRouter()
 
 
-@router.get("/", response_model=UserModelDTD)
+@router.get("/", response_model=UserModelDTO)
 async def me(
     user: SystemUser = Depends(get_current_user)
-) -> UserModelDTD:
+) -> UserModelDTO:
     """
     Retrieve current user object from the database.
 

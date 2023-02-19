@@ -54,11 +54,6 @@ class KeyDAO:
         query = select(KeyModel).where(KeyModel.key == key)
         key = await self.session.execute(query)
         key = key.scalar()
-        if not key:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Key not found",
-            )
         return key
 
     async def get_user_keys(self, user_id: uuid) -> list[KeyModel]:
@@ -72,3 +67,12 @@ class KeyDAO:
         keys = keys.scalars().all()
         return keys
 
+    async def update_key(self, key: KeyModel):
+        """
+        Update key usage.
+
+        :param key: key object.
+        """
+
+        key.usage += 1
+        self.session.add(key)

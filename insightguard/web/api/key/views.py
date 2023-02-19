@@ -1,6 +1,7 @@
 import uuid
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from starlette import status
 
 from insightguard.db.dao.key_dao import KeyDAO
 from insightguard.web.api.key.schema import KeyModelDTD
@@ -12,7 +13,13 @@ router = APIRouter()
 
 @router.get("/", response_model=KeyModelDTD)
 async def get_key(key: str, key_dao: KeyDAO = Depends()):
-    return await key_dao.get_key(key)
+    key = await key_dao.get_key(key)
+    if not key:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid API key.",
+        )
+    return key
 
 
 @router.put("/")

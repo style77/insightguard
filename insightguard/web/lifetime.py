@@ -11,6 +11,7 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
 )
 
+from insightguard.services.insightguard.lifetime import init_models
 from insightguard.services.redis.lifetime import init_redis, shutdown_redis
 from insightguard.settings import settings
 
@@ -55,7 +56,7 @@ def register_startup_event(
     Actions to run on application startup.
 
     This function uses fastAPI app to store data
-    inthe state, such as db_engine.
+    in the state, such as db_engine.
 
     :param app: the fastAPI application.
     :return: function that actually performs actions.
@@ -66,6 +67,7 @@ def register_startup_event(
         _setup_db(app)
         init_redis(app)
         setup_prometheus(app)
+        init_models(app)
         pass  # noqa: WPS420
 
     return _startup
