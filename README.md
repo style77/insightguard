@@ -92,7 +92,7 @@ If you want to revert migrations, you should run:
 alembic downgrade <revision_id>
 
 # Revert everything.
- alembic downgrade base
+alembic downgrade base
 ```
 
 ### Migration generation
@@ -117,14 +117,12 @@ docker-compose -f deploy/docker-compose.yml --project-directory . down
 ```
 
 For running tests on your local machine.
-1. you need to start a database.
-
-    I prefer doing it with docker:
-    ```
-    docker run -p "5432:5432" -e "POSTGRES_PASSWORD=insightguard" -e "POSTGRES_USER=insightguard" -e "POSTGRES_DB=insightguard" postgres:13.8-bullseye
-    ```
+1. you need to start a database. For example with docker:
+```bash
+docker run -p "5432:5432" -e "POSTGRES_PASSWORD=insightguard" -e "POSTGRES_USER=insightguard" -e "POSTGRES_DB=insightguard" postgres:13.8-bullseye
+```
 
 2.Run the pytest.
-    ```bash
-    pytest -vv .
-    ```
+```bash
+pytest -vv .
+```
