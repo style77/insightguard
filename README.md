@@ -1,7 +1,9 @@
 # insightguard
 
-InsightGuard is a simple API, that can be used to predict if message is considered as cyber bullying or not. \
-Models are trained in 5 languages: English, Polish, Japanese, Spanish, Catalan. \
+InsightGuard is a simple API, that can be used to predict if message is considered as cyberbullying or not.
+
+Models are trained in 5 languages: English, Polish, Japanese, Spanish, Catalan.
+
 Project is easily scalable to perform predictions in other languages, and to create new features.
 
 Project structure was generated using awesome [fastapi_template](https://github.com/s3rius/FastAPI-template/).
@@ -54,7 +56,7 @@ This application can be configured with environment variables.
 You can create `.env` file in the root directory and place all
 environment variables here.
 
-All environment variabels should start with "INSIGHTGUARD_" prefix.
+All environment variables should start with "INSIGHTGUARD_" prefix.
 
 For example if you see in your "insightguard/settings.py" a variable named like
 `random_parameter`, you should provide the "INSIGHTGUARD_RANDOM_PARAMETER"
@@ -126,3 +128,11 @@ docker run -p "5432:5432" -e "POSTGRES_PASSWORD=insightguard" -e "POSTGRES_USER=
 ```bash
 pytest -vv .
 ```
+
+## Contributing
+
+If you want to contribute to this project, feel free to open a pull request.
+
+## License
+
+This project is licensed under the terms of the MIT license.
