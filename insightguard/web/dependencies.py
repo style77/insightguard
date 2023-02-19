@@ -3,7 +3,6 @@ from datetime import datetime
 import redis.asyncio as redis
 from fastapi import HTTPException, Depends, FastAPI
 from fastapi.security import HTTPBearer, OAuth2PasswordBearer
-from fastapi_limiter import FastAPILimiter
 from jose import jwt
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
