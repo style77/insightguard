@@ -2,6 +2,7 @@ from asyncio import current_task
 from typing import Awaitable, Callable
 
 from fastapi import FastAPI
+from fastapi_limiter import FastAPILimiter
 from prometheus_fastapi_instrumentator.instrumentation import (
     PrometheusFastApiInstrumentator,
 )
@@ -14,6 +15,7 @@ from sqlalchemy.ext.asyncio import (
 from insightguard.services.insightguard.lifetime import init_models
 from insightguard.services.redis.lifetime import init_redis, shutdown_redis
 from insightguard.settings import settings
+from insightguard.web.dependencies import init_limiter
 
 
 def _setup_db(app: FastAPI) -> None:  # pragma: no cover
@@ -67,6 +69,7 @@ def register_startup_event(
         _setup_db(app)
         init_redis(app)
         setup_prometheus(app)
+        await init_limiter(app)
         init_models(app)
         pass  # noqa: WPS420
 

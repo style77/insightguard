@@ -5,6 +5,7 @@ from fastapi.responses import UJSONResponse
 
 from insightguard.web.api.router import api_router
 from insightguard.web.lifetime import register_shutdown_event, register_startup_event
+from insightguard.web.middlewares import ProcessTimeHeader
 
 
 def get_app() -> FastAPI:
@@ -27,6 +28,8 @@ def get_app() -> FastAPI:
     # Adds startup and shutdown events.
     register_startup_event(app)
     register_shutdown_event(app)
+
+    app.add_middleware(ProcessTimeHeader)
 
     # Main router for the API.
     app.include_router(router=api_router, prefix="/api")
