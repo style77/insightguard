@@ -13,4 +13,3 @@ class PredictionOutputDTO(BaseModel):
 class PredictionInputDTO(BaseModel):
     text: str
     language: str
-    api_key: str
