@@ -64,6 +64,12 @@ services:
       timeout: 3s
       retries: 50
 
+  nginx:
+    build:
+      context: .
+      dockerfile: ./deploy/nginx/Dockerfile
+    ports:
+      - "80:80"
 
 
 volumes:
