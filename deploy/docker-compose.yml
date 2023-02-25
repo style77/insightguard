@@ -1,26 +1,26 @@
 version: '3.9'
 
 services:
-  api:
-    build:
-      context: .
-      dockerfile: ./deploy/Dockerfile
-    image: insightguard:${INSIGHTGUARD_VERSION:-latest}
-    restart: always
-    env_file:
-    - .env
-    depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    environment:
-      INSIGHTGUARD_HOST: 0.0.0.0
-      INSIGHTGUARD_DB_HOST: insightguard-db
-      INSIGHTGUARD_DB_PORT: 5432
-      INSIGHTGUARD_DB_USER: insightguard
-      INSIGHTGUARD_DB_PASS: insightguard
-      INSIGHTGUARD_DB_BASE: insightguard
+#  api:
+#    build:
+#      context: .
+#      dockerfile: ./deploy/Dockerfile
+#    image: insightguard:${INSIGHTGUARD_VERSION:-latest}
+#    restart: always
+#    env_file:
+#    - .env
+#    depends_on:
+#      db:
+#        condition: service_healthy
+#      redis:
+#        condition: service_healthy
+#    environment:
+#      INSIGHTGUARD_HOST: 0.0.0.0
+#      INSIGHTGUARD_DB_HOST: insightguard-db
+#      INSIGHTGUARD_DB_PORT: 5432
+#      INSIGHTGUARD_DB_USER: insightguard
+#      INSIGHTGUARD_DB_PASS: insightguard
+#      INSIGHTGUARD_DB_BASE: insightguard
 
   db:
     image: postgres:13.8-bullseye
@@ -64,12 +64,12 @@ services:
       timeout: 3s
       retries: 50
 
-  nginx:
-    build:
-      context: .
-      dockerfile: ./deploy/nginx/Dockerfile
-    ports:
-      - "80:80"
+#  nginx:
+#    build:
+#      context: .
+#      dockerfile: ./deploy/nginx/Dockerfile
+#    ports:
+#      - "80:80"
 
 
 volumes:
