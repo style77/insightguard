@@ -3,8 +3,6 @@ import {User} from "../types/User";
 
 const authContext = createContext(null);
 
-// Provider component that wraps your app and makes auth object ...
-// ... available to any child component that calls useAuth().
 export function ProvideAuth({children}) {
     const auth = useProvideAuth();
     return <authContext.Provider value={auth}>{children}</authContext.Provider>;
@@ -70,6 +68,10 @@ function useProvideAuth() {
                 full_name: fullName,
             }),
         });
+    }
+
+    const logout = async () => {
+        setUser(null);
     }
 
 
