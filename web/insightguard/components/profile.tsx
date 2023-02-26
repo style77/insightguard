@@ -146,7 +146,26 @@ const SkeletonAvatar = styled.div`
   animation: ${pulse} 2s ease-in-out infinite;
 `;
 
-const Profile = () => {
+const LoginButton = styled.a`
+  width: 6em;
+  height: 30px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgb(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color, opacity, color 250ms;
+  color: rgb(240, 240, 240, 0.7);
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: rgb(240, 240, 240, 1);
+  }
+`;
+
+const Profile = ({landing}) => {
     const auth = useAuth();
     const dropdownRef = useRef<HTMLDivElement>(null);
     const [active, setActive] = useState<boolean>(false);
@@ -184,9 +203,13 @@ const Profile = () => {
                     </Dropdown>
                     <AiOutlineUser className="profile-icon"/>
                 </Avatar>
+            ) : (landing ? (
+                <LoginButton href="/login">
+                    Sign In
+                </LoginButton>
             ) : (
                 <SkeletonAvatar/>
-            )}
+            ))}
         </>
     )
 }

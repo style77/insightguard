@@ -52,16 +52,28 @@ const LogoIcon = styled.div`
   }
 `;
 
-const Navbar = () => {
+const LogoLink = styled.a`
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+`;
+
+const Navbar = ({landing=false}) => {
     return (
         <NavbarContainer>
             <Logo>
-                <LogoIcon>
-                    <FiShield/>
-                </LogoIcon>
-                InsightGuard
+                <LogoLink href="/">
+                    <LogoIcon>
+                        <FiShield/>
+                    </LogoIcon>
+                    InsightGuard
+                </LogoLink>
             </Logo>
-            <Profile/>
+            <Profile landing={landing}/>
         </NavbarContainer>
     );
 };
