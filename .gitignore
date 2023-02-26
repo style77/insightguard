@@ -140,3 +140,12 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+node_modules/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+yarn.lock
+package-lock.json
+.DS_Store
+.next
