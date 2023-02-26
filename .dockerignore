@@ -142,3 +142,8 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# web
+node_modules/
+.next/
+web/

@@ -20,7 +20,7 @@ RUN apt-get purge -y \
   gcc \
   && rm -rf /var/lib/apt/lists/*
 
-# Copying actuall application
+# Copying actual application
 COPY . /app/src/
 RUN poetry install
 
