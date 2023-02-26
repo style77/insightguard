@@ -1,37 +1,67 @@
 import styled from 'styled-components';
+import Profile from "./profile";
+import {FiShield} from "react-icons/fi";
 
 const NavbarContainer = styled.nav`
-  position: absolute;
+  position: relative;
   top: 0;
-  margin-top: 15px;
-  justify-content: center;
+  height: 64px;
+  display: flex;
   align-items: center;
-  height: 80px;
-  background-color: transparent;
-`;
-
-const NavItem = styled.a`
-  margin: 0 32px;
-  font-size: 20px;
-  font-weight: 600;
-  text-shadow: 2px 2px 0 #666, 3px 3px 0 #555, 4px 4px 0 #444, 5px 5px 0 #333;
-  text-decoration: none;
-  color: #fff;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
+  justify-content: space-between;
+  background-color: rgb(20, 20, 20);
+  padding: 0 64px;
+  width: 100%;
+  border-bottom: 2px solid rgb(255, 255, 255, 0.5);
+  transition: border-bottom 250ms;
 
   &:hover {
-    color: #7c3aed;
-    transform: scale(1.1);
+    border-bottom: 2px solid rgb(255, 255, 255, .7);
+  }
+`;
+
+const Logo = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: "Rubik", sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  color: rgb(240, 240, 240, 0.8);
+  transition: color 250ms;
+  cursor: default;
+
+  &:hover {
+    color: rgb(240, 240, 240, 1);
+  }
+`;
+
+const LogoIcon = styled.div`
+  display: flex;
+  font-size: 24px;
+  animation: spin 1s linear;
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+      transition-timing-function: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
   }
 `;
 
 const Navbar = () => {
     return (
         <NavbarContainer>
-            <NavItem href="/">Home</NavItem>
-            <NavItem href="/about">About</NavItem>
-            <NavItem href="/contact">Contact</NavItem>
+            <Logo>
+                <LogoIcon>
+                    <FiShield/>
+                </LogoIcon>
+                InsightGuard
+            </Logo>
+            <Profile/>
         </NavbarContainer>
     );
 };

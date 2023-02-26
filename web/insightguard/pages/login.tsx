@@ -60,7 +60,7 @@ const Popup = styled.div`
 
 export default function Login() {
     const router = useRouter();
-    const {registered} = router.query;
+    const {registered, login_required} = router.query;
 
     const usernameRef = useRef<HTMLInputElement>(null);
     const passwordRef = useRef<HTMLInputElement>(null);
@@ -77,11 +77,14 @@ export default function Login() {
             const data = await res.json()
             errorRef.current.innerText = data.detail;
         }
+
+        router.push('/dashboard');
     }
 
     return (
         <>
             {registered && <Popup>Successfully registered! You can login now</Popup>}
+            {login_required && <Popup>You need to login to access this page</Popup>}
             <LoginContainer>
                 <LoginForm onSubmit={handleSubmit}>
 
