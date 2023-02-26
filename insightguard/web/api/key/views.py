@@ -22,7 +22,8 @@ async def get_key(key: str, key_dao: KeyDAO = Depends()):
     return key
 
 
-@router.put("/")
+@router.put("/", response_model=KeyModelDTD)
 async def create_key(user: SystemUser = Depends(get_current_user),
                      key_dao: KeyDAO = Depends()):
-    await key_dao.create_key(user.id)
+    key = await key_dao.create_key(user.id)
+    return KeyModelDTD.from_orm(key)

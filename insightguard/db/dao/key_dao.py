@@ -8,6 +8,7 @@ from starlette import status
 from insightguard.db.dependencies import get_db_session
 from insightguard.db.models.key_model import KeyModel
 from insightguard.db.models.user_model import UserModel
+from insightguard.settings import settings
 
 KEYS_LIMIT = {
     'free': 1,
@@ -22,7 +23,7 @@ class KeyDAO:
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
 
-    async def create_key(self, user_id: uuid) -> None:
+    async def create_key(self, user_id: uuid) -> KeyModel:
         """
         Add key to session.
 
@@ -36,13 +37,19 @@ class KeyDAO:
         )
         user = user.scalar()
 
-        if len(keys) >= KEYS_LIMIT[user.account_type]:
+        if len(keys) >= KEYS_LIMIT[user.account_type] and settings.environment == 'production':
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="You have reached your key limit",
             )
 
-        self.session.add(KeyModel(user_id=user_id))
+        key = KeyModel(user_id=user_id)
+
+        self.session.add(key)
+        await self.session.commit()
+        await self.session.refresh(key)
+
+        return key
 
     async def get_key(self, key: str) -> KeyModel:
         """
