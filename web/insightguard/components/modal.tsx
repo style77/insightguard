@@ -1,8 +1,18 @@
 import styled from "styled-components";
 import useOnClickOutside from "../hooks/useOnClickOutside";
-import {ReactNode, useRef, useState} from "react";
+import {ReactNode, useEffect, useRef, useState} from "react";
 import {useAuth} from "../hooks/useAuth";
-import {HiOutlineClipboardCopy} from "react-icons/all";
+import {
+    AiFillWarning,
+    BsKeyFill,
+    FaEye, FaTrash,
+    FiLock, FiUnlock,
+    HiOutlineClipboardCopy,
+    IoAnalyticsOutline
+} from "react-icons/all";
+import {Key} from "../types/Key";
+import {pulse} from "./profile";
+import {useRouter} from "next/router";
 
 const ModalBase = styled.div`
   position: fixed;
@@ -164,7 +174,7 @@ export const ModalButton = styled.button`
   transition: background-color 250ms;
 
   &:hover {
-    background-color: ${({hoverColor}) => hoverColor || "rgba(255, 255, 255, 0.1)"};
+    background-color: rgba(255, 255, 255, 0.1);
   }
 `;
 
@@ -177,7 +187,7 @@ export const ModalFooter = styled.div`
 `;
 
 export const ModalFooterLink = styled.a`
-  color: #fff;
+  color: rgb(255, 255, 255, 0.8);;
   cursor: pointer;
   transition: color 250ms;
 
@@ -247,16 +257,16 @@ const CopiedText = styled.div`
   border-radius: 10px;
   pointer-events: none;
   z-index: 101;
-  animation: fadeOut 750ms ease-in-out forwards;
+  animation: fadeOut 1000ms ease-in-out forwards;
 
   @keyframes fadeOut {
-  0%, 100% {
-    opacity: 0;
+    0%, 100% {
+      opacity: 0;
+    }
+    25%, 75% {
+      opacity: 1;
+    }
   }
-  25%, 75% {
-    opacity: 1;
-  }
-}
 `;
 
 export const NewApiKeyModal = ({setModal}) => {
@@ -267,7 +277,7 @@ export const NewApiKeyModal = ({setModal}) => {
     const [copied, setCopied] = useState(false);
 
     const createNewApiKey = async () => {
-        const res = await fetch(process.env.API_URL + "/api/key", {
+        const res = await fetch(process.env.API_URL + "/api/key/", {
             method: "PUT",
             headers: {
                 "Content-Type": "application/json",
@@ -284,17 +294,17 @@ export const NewApiKeyModal = ({setModal}) => {
         }
     }
 
-    const CopyToClipboard = () => {
-        navigator.clipboard.writeText(newKey);
+    const copyToClipboard = async () => {
+        await navigator.clipboard.writeText(newKey);
         setCopied(true);
         setTimeout(() => {
             setCopied(false);
-        }, 750)
+        }, 1000)
     }
 
     return (
         <Modal onClose={() => setModal(null)} title="New API key"
-               description="Create new API key to use InsightGuard in your next awesome app! (P.S. for now writing name and description doesn't work sorry)">
+               description="Create API key to use InsightGuard in your next awesome app! (P.S. for now writing name and description doesn't work, but we had to fill blank space. Sorry)">
             <ModalForm>
                 <label htmlFor="name">Name</label>
                 <input type="text" id="name" placeholder="Name"/>
@@ -305,16 +315,14 @@ export const NewApiKeyModal = ({setModal}) => {
             </ModalForm>
             <ModalButtons>
                 <ModalButton onClick={() => setModal(null)}>Cancel</ModalButton>
-                <ModalButton onClick={() => createNewApiKey()}
-                             color="rgb(30, 130, 100, 1)"
-                             hoverColor="rgb(30, 160, 100, 1)">Create</ModalButton>
+                <ModalButton onClick={() => createNewApiKey()}>Create</ModalButton>
             </ModalButtons>
             {newKey && (
                 <>
                     {copied && <CopiedText><HiOutlineClipboardCopy/>Copied to clipboard!</CopiedText>}
                     <ModalFooter>
                         <p>Your new API key: <ModalFooterCode
-                            onClick={CopyToClipboard}>{newKey}</ModalFooterCode></p>
+                            onClick={copyToClipboard}>{newKey}</ModalFooterCode></p>
                         <p>To learn how to use it please check <ModalFooterLink
                             href="/documentation">documentation</ModalFooterLink></p>
                     </ModalFooter>
@@ -325,6 +333,366 @@ export const NewApiKeyModal = ({setModal}) => {
                     <p>Something went
                         wrong: <ModalFooterCodeBlock>{error}</ModalFooterCodeBlock></p>
                 </ModalFooter>
+            )}
+        </Modal>
+    )
+}
+
+const ModalKeys = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  overflow-y: auto;
+
+  & > p {
+    color: rgb(255, 255, 255, 0.5);
+  }
+`;
+
+const KeyContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: start;
+  justify-content: center;
+  width: 100%;
+  padding: 16px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin-bottom: 16px;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+`;
+
+const KeyHeaderContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  justify-content: center;
+  min-width: 85%;
+  margin-right: 16px;
+
+  @media (max-width: 768px) {
+    margin-right: 0;
+  }
+`;
+
+const KeyHeader = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: start;
+  width: 100%;
+`;
+
+const KeyContainerSkeleton = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px;
+  border-radius: 10px;
+  background-color: rgba(255, 255, 255, 0.1);
+  margin-bottom: 16px;
+
+  animation: ${pulse} 2s ease-in-out infinite;
+`;
+
+const KeyIcon = styled.div`
+  display: flex;
+  justify-content: center;
+
+  ::after {
+    content: "";
+    display: block;
+    width: 1px;
+    height: 20px;
+    background-color: rgba(255, 255, 255);
+    margin-inline: 10px;
+  }
+`;
+
+const KeyContainerUtils = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  margin-left: auto;
+  cursor: pointer;
+  gap: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  transition: color 500ms ease-in-out;
+
+  & > .icon:hover {
+    color: rgba(255, 255, 255, 1);
+  }
+
+  @media (max-width: 768px) {
+    margin-left: 0;
+    margin-top: 8px;
+  }
+`;
+
+const ModalDate = styled.p`
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 2px 0 0;
+`;
+
+const ConfirmModal = styled.div`
+  position: absolute;
+  background-color: rgba(20, 20, 20, 1);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow-y: auto;
+
+  & > p {
+    color: rgb(255, 255, 255, 0.5);
+  }
+`;
+
+type ApiKeyCardProps = {
+    keyData: Key;
+    analytics: boolean;
+}
+
+export const ApiKeyCard = ({
+                               keyData,
+                               analytics = false,
+                           }: ApiKeyCardProps) => {
+    const auth = useAuth();
+    const router = useRouter();
+    const [showDetails, setShowDetails] = useState(false);
+    const [copied, setCopied] = useState(false);
+
+    const [data, setData] = useState<Key | null>(keyData);
+
+    const [showLockConfirmation, setShowLockConfirmation] = useState(false);
+    const [showUnlockConfirmation, setShowUnlockConfirmation] = useState(false);
+    const confirmModalRef = useRef<HTMLDivElement>(null);
+
+    // used for animation purposes
+    const [locked, setLocked] = useState(false);
+    const [unlocked, setUnlocked] = useState(false);
+
+    useOnClickOutside(confirmModalRef, () => {
+        showLockConfirmation && setShowLockConfirmation(false);
+        showUnlockConfirmation && setShowUnlockConfirmation(false);
+    });
+
+    const copyToClipboard = async () => {
+        await navigator.clipboard.writeText(data.key);
+        setCopied(true);
+        setTimeout(() => {
+            setCopied(false);
+        }, 1000)
+    }
+
+    const lockApiKey = async () => {
+        const res = await fetch(process.env.API_URL + '/api/key/disable?key=' + data.key,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + auth.user.accessToken
+                }
+            })
+        if (res.status === 200) {
+            setData(await res.json())
+            setLocked(true);
+            setInterval(() => {
+                setLocked(false);
+                setShowLockConfirmation(false)
+            }, 1000)
+
+        }
+    }
+
+    const unlockApiKey = async () => {
+        const res = await fetch(process.env.API_URL + '/api/key/enable?key=' + data.key,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + auth.user.accessToken
+                }
+            })
+        if (res.status === 200) {
+            setData(await res.json())
+            setUnlocked(true);
+            setInterval(() => {
+                setUnlocked(false);
+                setShowUnlockConfirmation(false)
+            }, 1000)
+
+        }
+    }
+
+    return (
+        <>
+            {copied &&
+                <CopiedText><HiOutlineClipboardCopy/>Copied to clipboard!</CopiedText>
+            }
+            {
+                showUnlockConfirmation && (
+                    <ModalBase>
+                        {unlocked &&
+                            <CopiedText>Unlocked key!</CopiedText>
+                        }
+                        <ConfirmModal ref={confirmModalRef}>
+                            <ModalTitle>
+                                <h3>Are you sure?</h3>
+                                <h4>
+                                    <p>Are you sure you want to unlock this API key?</p>
+                                    <p>Unlocked API keys can be used to access the API.</p>
+                                    <p>Unlocked API keys can be locked at any time.</p>
+                                </h4>
+                            </ModalTitle>
+                            <ModalButtons>
+                                <ModalButton
+                                    onClick={() => setShowUnlockConfirmation(false)}>Cancel</ModalButton>
+                                <ModalButton
+                                    onClick={() => unlockApiKey()}>Unlock</ModalButton>
+                            </ModalButtons>
+                        </ConfirmModal>
+                    </ModalBase>
+                )
+            }
+            {
+                showLockConfirmation && (
+                    <ModalBase>
+                        {locked &&
+                            <CopiedText>Locked key!</CopiedText>
+                        }
+                        <ConfirmModal ref={confirmModalRef}>
+                            <ModalTitle>
+                                <h3>Are you sure?</h3>
+                                <h4>
+                                    <p>Are you sure you want to lock this API key?</p>
+                                    <p>Locked API keys cannot be used to access the API.</p>
+                                    <p>Locked API keys can be unlocked at any time.</p>
+                                </h4>
+                            </ModalTitle>
+                            <ModalButtons>
+                                <ModalButton
+                                    onClick={() => setShowLockConfirmation(false)}>Cancel</ModalButton>
+                                <ModalButton
+                                    onClick={() => lockApiKey()}>Lock</ModalButton>
+                            </ModalButtons>
+                        </ConfirmModal>
+                    </ModalBase>
+                )
+            }
+
+            <KeyContainer>
+                <KeyHeaderContainer>
+                    <KeyHeader>
+                        <KeyIcon>
+                            <BsKeyFill/>
+                        </KeyIcon>
+                        <ModalFooterCode onClick={copyToClipboard}>{showDetails ? (
+                            <>
+                                {data.key}
+                            </>
+                        ) : (
+                            <>
+                                {data.key.substring(0, 10)}...{data.key.substring(data.key.length - 10, data.key.length)}
+                            </>
+                        )}</ModalFooterCode>
+                    </KeyHeader>
+                    <ModalDate>
+                        Created at {new Date(data.created_at).toLocaleString()} {analytics && `• Total usage: ${data.usage}`} {data.disabled && `• Disabled`}
+                    </ModalDate>
+                </KeyHeaderContainer>
+                <KeyContainerUtils>
+                    <FaEye onClick={() => setShowDetails(!showDetails)}
+                           className="icon"/>
+                    {analytics ? <IoAnalyticsOutline className="icon"
+                                                     onClick={() => router.push('/analytics/' + data.id)}/> :
+                        (<>
+                            {data.disabled ?
+                                <FiUnlock className="icon"
+                                          onClick={() => setShowUnlockConfirmation(true)}/> :
+                                <FiLock className="icon"
+                                        onClick={() => setShowLockConfirmation(true)}/>
+                            }
+                        </>)
+                    }
+
+                </KeyContainerUtils>
+            </KeyContainer>
+        </>
+    )
+}
+
+export const ApiKeysModal = ({setModal, analytics=false}) => {
+    const auth = useAuth();
+
+    // We don't have to secure keys in state, because Next.js handles it for us
+    const [apiKeys, setApiKeys] = useState<Key[]>([]);
+
+    const errorRef = useRef(null);
+
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchApiKeys = async () => {
+            setLoading(true)
+            const res = await fetch(process.env.API_URL + "/api/user/keys", {
+                headers: {
+                    'Authorization': 'Bearer ' + auth.user.accessToken
+                }
+            });
+
+            if (res.status === 200) {
+                const data = await res.json();
+
+                setApiKeys(data);
+            } else {
+                const data = await res.json();
+                errorRef.current.innerText = data.detail;
+            }
+            setLoading(false)
+        }
+
+        fetchApiKeys();
+    }, [auth.user.accessToken])
+
+    return (
+        <Modal onClose={() => setModal(null)} title={analytics ? "API keys analytics" : "API keys"}
+               description={analytics ? "Choose API key to analyze" : "Manage your API keys"}>
+            {loading ? (
+                <ModalKeys>
+                    {Array.from(Array(3).keys()).map(key => (
+                        <KeyContainerSkeleton key={key}/>
+                    ))}
+                </ModalKeys>
+            ) : (
+                <>
+                    {apiKeys.length > 0 ? (
+                        <ModalKeys>
+                            {apiKeys.map(key => (
+                                <ApiKeyCard key={key.id} keyData={key} analytics={analytics}/>
+                            ))}
+                        </ModalKeys>
+                    ) : (
+                        <ModalKeys>
+                            <p>You don&apos;t have any API keys yet. <ModalFooterLink
+                                onClick={() => setModal(<NewApiKeyModal
+                                    setModal={setModal}/>)}
+                                href="#">Create one</ModalFooterLink></p>
+                        </ModalKeys>
+                    )}</>
             )}
         </Modal>
     )

@@ -62,7 +62,19 @@ const LogoLink = styled.a`
   gap: 4px;
 `;
 
-const Navbar = ({landing=false}) => {
+type NavbarProps = {
+    landing?: boolean;
+    openKeysModal?: () => void;
+    openProfileModal?: () => void;
+    openSettingsModal?: () => void;
+}
+
+const Navbar = ({
+                    landing = false,
+                    openKeysModal,
+                    openProfileModal,
+                    openSettingsModal
+                }: NavbarProps) => {
     return (
         <NavbarContainer>
             <Logo>
@@ -73,7 +85,9 @@ const Navbar = ({landing=false}) => {
                     InsightGuard
                 </LogoLink>
             </Logo>
-            <Profile landing={landing}/>
+            <Profile landing={landing} openKeysModal={openKeysModal}
+                     openProfileModal={openProfileModal}
+                     openSettingsModal={openSettingsModal}/>
         </NavbarContainer>
     );
 };

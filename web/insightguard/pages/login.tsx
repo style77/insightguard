@@ -349,7 +349,7 @@ export default function Login() {
                                 <button type="submit">Sign in</button>
                             </LoginCardForm>
                             <LoginCardFooter>
-                                <p>Don't have an account? <a
+                                <p>Don&apos;t have an account? <a
                                     onClick={() => setRegister(true)}>Register</a>
                                 </p>
                             </LoginCardFooter>

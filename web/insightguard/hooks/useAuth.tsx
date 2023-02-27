@@ -107,6 +107,8 @@ function useProvideAuth() {
 
     const logout = async () => {
         setUser(null);
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
     }
 
 

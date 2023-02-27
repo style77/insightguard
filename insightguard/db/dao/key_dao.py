@@ -74,7 +74,7 @@ class KeyDAO:
         keys = keys.scalars().all()
         return keys
 
-    async def update_key(self, key: KeyModel):
+    async def update_key_usage(self, key: KeyModel):
         """
         Update key usage.
 

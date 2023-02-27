@@ -62,6 +62,6 @@ async def predict(input: PredictionInputDTO,
         probability=None
     )
 
-    await key_dao.update_key(key)
+    await key_dao.update_key_usage(key)
 
     return p

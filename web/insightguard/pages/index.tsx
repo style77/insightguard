@@ -1,158 +1,131 @@
 import styled from 'styled-components';
 import Navbar from "../components/navbar";
 import {useRouter} from "next/router";
+import {Shield} from "../components/shieldmodel";
+import {Canvas} from "@react-three/fiber";
+import {FiShield} from "react-icons/all";
+
+import {
+    EffectComposer,
+    DepthOfField,
+    Bloom,
+    Noise,
+    Vignette
+} from '@react-three/postprocessing'
 
 const LandingPageContainer = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  height: calc(100vh - 64px);
   position: relative;
-  background: linear-gradient(to right, #444444, #222222);
+  background: url('/background.jpg');
   background-size: cover;
+  overflow: hidden;
 `;
 
-const ContentWrapper = styled.div`
-  position: relative;
-  z-index: 2;
-`;
-
-const Heading = styled.h1`
-  font-size: 48px;
-  font-weight: bold;
-  margin-bottom: 24px;
-  color: #fff;
-  font-family: 'Inter', sans-serif;
-  text-shadow: 2px 2px 0 #666, 3px 3px 0 #555, 4px 4px 0 #444, 5px 5px 0 #333;
-  letter-spacing: 2px;
-`;
-
-const SubHeading = styled.h2`
-  font-size: 24px;
-  font-weight: normal;
-  margin-bottom: 32px;
-  color: #fff;
-  font-family: 'Inter', sans-serif;
-  text-shadow: 2px 2px 0 #666, 3px 3px 0 #555, 4px 4px 0 #444, 5px 5px 0 #333;
-  letter-spacing: 1px;
-`;
-
-const Button = styled.button`
-  padding: 16px 32px;
-  font-size: 20px;
-  font-weight: 700;
-  background-color: #ffffff;
-  color: #7c3aed;
-  font-family: 'Inter', sans-serif;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-  width: 200px;
-  margin-top: 32px;
-  margin-left: 32px;
-  box-shadow: 2px 2px 0 #666, 3px 3px 0 #555, 4px 4px 0 #444, 5px 5px 0 #333;
-
-  &:hover {
-    background-color: #7c3aed;
-    color: #ffffff;
-  }
-`;
-
-const OppositeButton = styled.button`
-  padding: 16px 32px;
-  font-size: 20px;
-  font-weight: 700;
-  background-color: #7c3aed;
-  color: #ffffff;
-  font-family: 'Inter', sans-serif;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-  width: 200px;
-  margin-top: 32px;
-  box-shadow: 2px 2px 0 #666, 3px 3px 0 #555, 4px 4px 0 #444, 5px 5px 0 #333;
-
-  &:hover {
-    background-color: #ffffff;
-    color: #7c3aed;
-  }
-`;
-
-const SemiTransparentBackground = styled.div`
+const BackgroundFade = styled.div`
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1;
-  background-color: rgba(0, 0, 0, 0.1);
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 1) 100%);
 `;
 
-const FloatingLeftIcon = styled.img`
-  position: absolute;
-  top: 50%;
-  left: 10%;
-  transform: translateY(-50%);
+const Heading = styled.h1`
+  position: relative;
+  font-family: 'Rubik', sans-serif;
+  font-size: 4rem;
+  font-weight: 600;
+  color: rgb(255, 255, 255, 1);
+  text-align: center;
   z-index: 1;
-  width: 10%;
-  height: 10%;
-  animation: floatingAnimation 4s ease-in-out infinite;
+  margin: 0 0 1rem;
+  padding: 10rem;
+`;
 
-  @keyframes floatingAnimation {
-    0% {
-      transform: translateY(-50%) translateX(-10%);
-    }
-    50% {
-      transform: translateY(-40%) translateX(-10%);
-    }
-    100% {
-      transform: translateY(-50%) translateX(-10%);
-    }
+const SubHeading = styled.h2`
+  font-family: 'Rubik', sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  color: rgb(240, 240, 240, 0.8);
+  padding: 0;
+  text-align: center;
+  margin: 0 0 1rem;
+  z-index: 1;
+`;
+
+const Button = styled.button`
+  background: rgb(240, 240, 240, 0.8);
+  border: none;
+  border-radius: 0.5rem;
+  color: rgb(23, 23, 23, 0.95);
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: 0.2s;
+  margin: 0 0.5rem;
+  z-index: 1;
+
+  &:hover {
+    background: rgb(240, 240, 240, 1);
+    color: rgb(23, 23, 23, 1);
   }
 `;
 
-const FloatingRightIcon = styled.img`
-  position: absolute;
-  top: 50%;
-  right: 10%;
-  transform: translateY(-50%);
-  z-index: 1;
-  width: 10%;
-  height: 10%;
-  animation: floatingAnimation 4s ease-in-out infinite;
+const CanvasContainer = styled(Canvas)`
+  position: relative;
+  display: flex;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
 
-  @keyframes floatingAnimation {
-    0% {
-      transform: translateY(-50%) translateX(10%);
-    }
-    50% {
-      transform: translateY(-40%) translateX(10%);
-    }
-    100% {
-      transform: translateY(-50%) translateX(10%);
-    }
+  @media (max-width: 1000px) {
+    display: none;
   }
 `;
+
+const Buttons = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+`;
+
 
 export default function Home() {
     const router = useRouter();
     return (
         <>
+            <Navbar landing={true}/>
             <LandingPageContainer>
-                <SemiTransparentBackground/>
-                <ContentWrapper>
-                    <Heading>InsightGuard</Heading>
-                    <SubHeading>AI-powered cyberbullying detection API</SubHeading>
-                    <OppositeButton onClick={() => router.push('/login')}>Get
-                        Started</OppositeButton>
-                    <Button onClick={() => router.push('/about')}>Learn More</Button>
-                </ContentWrapper>
-                <FloatingLeftIcon src="/icon_security.svg"/>
-                <FloatingRightIcon src="/icon_appreciation.svg"/>
+                <BackgroundFade/>
+                <Heading>
+                    <FiShield style={{marginRight: '1rem'}}/>
+                    InsightGuard
+                    <SubHeading>
+                        AI-powered cyberbullying detection API
+                    </SubHeading>
+                    <Buttons>
+                        <Button onClick={() => router.push('/about')}>Learn
+                            more</Button>
+                        <Button onClick={() => router.push('/login')}>Get
+                            Started</Button>
+                    </Buttons>
+                </Heading>
 
+                <CanvasContainer>
+                    <Shield/>
+                    <EffectComposer>
+                        <Bloom luminanceThreshold={0} luminanceSmoothing={0.8}
+                               height={300}/>
+                    </EffectComposer>
+                </CanvasContainer>
             </LandingPageContainer>
         </>
     );

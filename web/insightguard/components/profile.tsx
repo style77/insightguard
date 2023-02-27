@@ -4,6 +4,7 @@ import {useRef, useState} from "react";
 import {GiHouseKeys} from "react-icons/gi";
 import useOnClickOutside from "../hooks/useOnClickOutside";
 import {useAuth, useRequireAuth} from "../hooks/useAuth";
+import {useRouter} from "next/router";
 
 
 const Avatar = styled.div`
@@ -118,7 +119,7 @@ const DropdownUsername = styled.div`
   transition: background-color 250ms;
 `;
 
-const pulse = keyframes`
+export const pulse = keyframes`
   0% {
     background-color: rgba(255, 255, 255, 0.05);
   }
@@ -165,8 +166,9 @@ const LoginButton = styled.a`
   }
 `;
 
-const Profile = ({landing}) => {
+const Profile = ({landing, openKeysModal, openProfileModal, openSettingsModal}) => {
     const auth = useAuth();
+    const router = useRouter();
     const dropdownRef = useRef<HTMLDivElement>(null);
     const [active, setActive] = useState<boolean>(false);
 
@@ -184,19 +186,19 @@ const Profile = ({landing}) => {
                         <DropdownUsername className="dropdown-username">
                             {auth.user.username}
                         </DropdownUsername>
-                        <DropdownItem className="dropdown-item">
+                        <DropdownItem className="dropdown-item" onClick={openKeysModal}>
                             <DropdownIcon><IoKeySharp/></DropdownIcon>
                             Keys
                         </DropdownItem>
-                        <DropdownItem className="dropdown-item">
+                        <DropdownItem className="dropdown-item" onClick={openProfileModal}>
                             <DropdownIcon><AiOutlineUser/></DropdownIcon>
                             Profile
                         </DropdownItem>
-                        <DropdownItem className="dropdown-item">
+                        <DropdownItem className="dropdown-item" onClick={openSettingsModal}>
                             <DropdownIcon><IoSettingsSharp/></DropdownIcon>
                             Settings
                         </DropdownItem>
-                        <DropdownItem className="dropdown-item">
+                        <DropdownItem className="dropdown-item" onClick={() => {auth.logout(); router.push('/')}}>
                             <DropdownIcon><CiLogout/></DropdownIcon>
                             Logout
                         </DropdownItem>

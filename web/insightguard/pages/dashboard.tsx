@@ -12,6 +12,7 @@ import {
 } from "react-icons/all";
 import Navbar from "../components/navbar";
 import Modal, {
+    ApiKeysModal,
     ModalButton,
     ModalButtons,
     ModalFooter, ModalFooterCode, ModalFooterLink,
@@ -22,7 +23,7 @@ const Container = styled.div`
   align-items: center;
   background-color: rgb(20, 20, 20);
   display: flex;
-  height: 100vh;
+  height: calc(100vh - 64px);
   justify-content: center;
   margin: 0;
   overflow: hidden;
@@ -180,7 +181,7 @@ export default function Dashboard() {
 
     useEffect(() => {
         document.getElementById("cards").onmousemove = e => {
-            for (const card of document.getElementsByClassName("card")) {
+            for (const card of document.getElementsByClassName("card") as HTMLCollectionOf<HTMLElement>) {
                 const rect = card.getBoundingClientRect(),
                     x = e.clientX - rect.left,
                     y = e.clientY - rect.top;
@@ -195,9 +196,17 @@ export default function Dashboard() {
         setModal(<NewApiKeyModal setModal={setModal}/>)
     }
 
+    const apiKeys = async () => {
+        setModal(<ApiKeysModal setModal={setModal}/>)
+    }
+
+    const analyticKeys = async () => {
+        setModal(<ApiKeysModal setModal={setModal} analytics={true}/>)
+    }
+
     return (
         <>
-            <Navbar/>
+            <Navbar openKeysModal={apiKeys}/>
             {modal}
             <Container>
                 <Cards id="cards" ref={cardsRef}>
@@ -217,7 +226,7 @@ export default function Dashboard() {
                             </CardInfoWrapper>
                         </CardContent>
                     </Card>
-                    <Card className="card">
+                    <Card className="card" onClick={apiKeys}>
                         <CardContent className="card-content">
                             <CardImage>
                                 <GiHouseKeys className="icon"/>
@@ -249,7 +258,7 @@ export default function Dashboard() {
                             </CardInfoWrapper>
                         </CardContent>
                     </Card>
-                    <Card className="card">
+                    <Card className="card" onClick={analyticKeys}>
                         <CardContent className="card-content">
                             <CardImage>
                                 <IoAnalyticsOutline className="icon"/>
