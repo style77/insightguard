@@ -58,7 +58,7 @@ class KeyDAO:
         :param key: key of a key.
         :return: A key object.
         """
-        query = select(KeyModel).where(KeyModel.key == key)
+        query = select(KeyModel).where(KeyModel.key == key and KeyModel.disabled is False)
         key = await self.session.execute(query)
         key = key.scalar()
         return key

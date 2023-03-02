@@ -8,13 +8,11 @@ from insightguard.ratelimiter.limiter import RateLimiter
 from insightguard.services.insightguard.model import BullyingScanner
 from insightguard.settings import settings
 from insightguard.web.api.bullying.schema import PredictionOutputDTO, PredictionInputDTO
-from insightguard.web.api.user.schema import SystemUser
-from insightguard.web.dependencies import get_current_user
 
 router = APIRouter()
 
-models_rate_limiter = RateLimiter(rate_limit=15000, rate_limit_window=86400,
-                                  redis_client=redis.from_url(str(settings.redis_url)))
+bullying_rate_limiter = RateLimiter(rate_limit=15000, rate_limit_window=86400,
+                                    redis_client=redis.from_url(str(settings.redis_url)))
 
 
 @router.post("/", response_model=PredictionOutputDTO)
@@ -23,7 +21,7 @@ async def predict(input: PredictionInputDTO,
                   x_api_key: str = Header(),
                   key_dao: KeyDAO = Depends(),
                   rate_limiter: RateLimiter = Depends(
-                      models_rate_limiter)) -> PredictionOutputDTO:
+                      bullying_rate_limiter)) -> PredictionOutputDTO:
     """
     Predicts class for input data.
 
