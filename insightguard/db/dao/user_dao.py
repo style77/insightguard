@@ -130,7 +130,7 @@ class UserDAO:
         user_context: str = None,
     ) -> UserModelDTO:
         """
-        Get specific user model.
+        Get specific user bullying.
 
         :param user_context: username or email of user instance.
         :return: user models.

@@ -198,7 +198,7 @@ const Profile = ({landing, openKeysModal, openProfileModal, openSettingsModal}) 
                             <DropdownIcon><IoSettingsSharp/></DropdownIcon>
                             Settings
                         </DropdownItem>
-                        <DropdownItem className="dropdown-item" onClick={() => {auth.logout(); router.push('/')}}>
+                        <DropdownItem className="dropdown-item" onClick={() => auth.logout()}>
                             <DropdownIcon><CiLogout/></DropdownIcon>
                             Logout
                         </DropdownItem>

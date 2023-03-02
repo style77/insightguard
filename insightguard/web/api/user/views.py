@@ -29,7 +29,7 @@ async def me(
     """
     Retrieve current user object from the database.
 
-    :param user: user model object.
+    :param user: user bullying object.
     :return: user object from database.
     """
     return user
@@ -41,9 +41,9 @@ async def create_user_model(
     user_dao: UserDAO = Depends(),
 ) -> None:
     """
-    Creates user model in the database.
+    Creates user bullying in the database.
 
-    :param new_user_object: new user model item.
+    :param new_user_object: new user bullying item.
     :param user_dao: DAO for user models.
     """
     await user_dao.create_user(**new_user_object.dict())

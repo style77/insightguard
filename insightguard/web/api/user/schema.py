@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 
 class UserModelInputDTO(BaseModel):
-    """DTO for creating new user model."""
+    """DTO for creating new user bullying."""
 
     username: str
     password: str
@@ -40,7 +40,7 @@ class UserModelDTO(BaseModel):
 
 
 class SystemUser(UserModelDTO):
-    """System user model."""
+    """System user bullying."""
 
     password: str
 
@@ -56,13 +56,13 @@ class AuthorizeInputDTO(BaseModel):
 
 
 class JWTTokenInputDTO(BaseModel):
-    """JWT token input model."""
+    """JWT token input bullying."""
 
     refresh_token: str
 
 
 class JWTTokenDTD(BaseModel):
-    """JWT token model."""
+    """JWT token bullying."""
 
     access_token: str
     refresh_token: str

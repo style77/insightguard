@@ -201,6 +201,28 @@ const LoginCardFooter = styled.div`
   }
 `;
 
+const LoadingBackdrop = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const LoadingSpinner = styled.div`
+  border: 16px solid rgb(23, 23, 23);
+  border-top: 16px solid #dedede;
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+`;
+
 export default function Login() {
     const router = useRouter();
     const {registered, login_required} = router.query;
@@ -216,12 +238,17 @@ export default function Login() {
 
     const auth = useAuth();
 
+    const [loading, setLoading] = useState(false);
+
     const [register, setRegister] = useState(false);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
 
+        setLoading(true);
+
         const res = await auth.signin(usernameRef.current.value, passwordRef.current.value);
+        setLoading(false);
         if (res.status !== 200) {
             const data = await res.json()
             errorRef.current.innerText = data.detail;
@@ -248,6 +275,11 @@ export default function Login() {
             <Navbar landing={true}/>
             {/*{registered && <Popup>Successfully registered! You can login now</Popup>}*/}
             {/*{login_required && <Popup>You need to login to access this page</Popup>}*/}
+            {loading && (
+                <LoadingBackdrop>
+                    <LoadingSpinner/>
+                </LoadingBackdrop>
+            )}
             {register ? (
                 <LoginContainer>
                     <LoginCardContainer>
@@ -344,7 +376,7 @@ export default function Login() {
                                 </FormItem>
                                 <FormItemOther className="form-item-other">
                                     <div ref={errorRef} style={{color: 'red'}}/>
-                                    <a href="#">Forgot password?</a>
+                                    {/*<a href="#">Forgot password?</a>*/}
                                 </FormItemOther>
                                 <button type="submit">Sign in</button>
                             </LoginCardForm>

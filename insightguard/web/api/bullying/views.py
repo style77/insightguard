@@ -7,7 +7,7 @@ from insightguard.db.dao.key_dao import KeyDAO
 from insightguard.ratelimiter.limiter import RateLimiter
 from insightguard.services.insightguard.model import BullyingScanner
 from insightguard.settings import settings
-from insightguard.web.api.model.schema import PredictionOutputDTO, PredictionInputDTO
+from insightguard.web.api.bullying.schema import PredictionOutputDTO, PredictionInputDTO
 from insightguard.web.api.user.schema import SystemUser
 from insightguard.web.dependencies import get_current_user
 

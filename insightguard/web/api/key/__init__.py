@@ -1,4 +1,4 @@
-"""Keys model API."""
+"""Keys bullying API."""
 from insightguard.web.api.key.views import router
 
 __all__ = ["router"]

@@ -34,7 +34,7 @@ const BackgroundFade = styled.div`
   background: linear-gradient(180deg, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 1) 100%);
 `;
 
-const Heading = styled.h1`
+const Heading = styled.div`
   position: relative;
   font-family: 'Rubik', sans-serif;
   font-size: 4rem;

@@ -69,7 +69,7 @@ class BullyingScanner(metaclass=SingletonMeta):
 
     def load_model(self, from_pt: bool):
         """
-          Loads BERT from pretrained model
+          Loads BERT from pretrained bullying
         """
         self.model = TFAutoModelForSequenceClassification.from_pretrained(
             model_map[self.lang], from_pt=from_pt)
@@ -80,8 +80,8 @@ class BullyingScanner(metaclass=SingletonMeta):
 
         Args:
             text (str): The text to be classified.
-            both (bool): Return one value from model or both
-            from_pt (bool): Load model from pytorch
+            both (bool): Return one value from bullying or both
+            from_pt (bool): Load bullying from pytorch
 
         Returns:
             Union[float, List[float]]: The probability of the text being a cyberbullying message.

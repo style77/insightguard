@@ -29,7 +29,7 @@ async def get_current_user(
     Get current user from database.
 
     :param token: JWT token.
-    :param user_dao: DAO for user model.
+    :param user_dao: DAO for user bullying.
     :return: current user.
     """
     # decode JWT token and extract user ID
