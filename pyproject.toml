@@ -32,6 +32,7 @@ tensorflow-io-gcs-filesystem = { version = "^0.23.1", python = ">=3.9,<3.11" }
 tensorflow = "^2.11.0"
 transformers = "^4.26.1"
 torch = "^1.13.1"
+datasets = "^2.10.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.2.1"

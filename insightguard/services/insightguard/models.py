@@ -1,12 +1,35 @@
-from typing import Union, List
+from typing import Union, List, Tuple, Set, Dict, Any
 
 import tensorflow as tf
+from keras.preprocessing.text import Tokenizer
+from keras.utils import pad_sequences
 from transformers import AutoTokenizer, TFAutoModelForSequenceClassification
 
 from threading import Lock, Thread
+import numpy as np
+from datasets import load_dataset
+
+data = load_dataset("Mitake/PhishingURLsANDBenignURLs")
 
 
 class SingletonMeta(type):
+    """
+    This is a thread-safe implementation of Singleton.
+    https://refactoring.guru/design-patterns/singleton/python/example#example-1
+    """
+
+    _instances = {}
+    _lock: Lock = Lock()
+
+    def __call__(cls, *args, **kwargs):
+        with cls._lock:
+            if cls not in cls._instances:
+                instance = super().__call__(*args, **kwargs)
+                cls._instances[cls] = instance
+        return cls._instances[cls]
+
+
+class SingletonMetaWithLang(SingletonMeta):
     """
     This is a thread-safe implementation of Singleton, with addition to store instances
     with different languages.
@@ -14,12 +37,11 @@ class SingletonMeta(type):
     """
 
     _instances = {}
-    _lock: Lock = Lock()
 
     def __call__(cls, lang: str, *args, **kwargs):
         with cls._lock:
             if lang not in cls._instances:
-                instance = super().__call__(lang, *args, **kwargs)
+                instance = super().__call__(*args, **kwargs)
                 cls._instances[lang] = instance
         return cls._instances[lang]
 
@@ -35,15 +57,15 @@ model_map = {
 # These are words that will for sure return positive value for scanner
 # they are used to set bullying_index on set up
 curse_words = {
-    "pl": "kurwo",
+    "pl": "idiota",
     "jp": "クソゴミ",
     "sp": "maldita basura",
     "ca": "putes escombraries",
-    "en": "fucking trash",
+    "en": "fucking idiot",
 }
 
 
-class BullyingScanner(metaclass=SingletonMeta):
+class BullyingScanner(metaclass=SingletonMetaWithLang):
     def __init__(self, lang: str):
         self.lang = lang
         self.tokenizer = None
@@ -74,36 +96,38 @@ class BullyingScanner(metaclass=SingletonMeta):
         self.model = TFAutoModelForSequenceClassification.from_pretrained(
             model_map[self.lang], from_pt=from_pt)
 
-    async def predict(self, text: str, both: bool = False) -> Union[float, List[float]]:
+    async def predict(self, text: Union[str, List[str]], both: bool = False) -> Union[float, List[float]]:
         """
         Predict the probability of the input text being a cyberbullying message.
 
         Args:
-            text (str): The text to be classified.
+            text (Union[str, List[str]]): The text or list of texts to be classified.
             both (bool): Return one value from bullying or both
-            from_pt (bool): Load bullying from pytorch
 
         Returns:
             Union[float, List[float]]: The probability of the text being a cyberbullying message.
         """
+        if isinstance(text, str):
+            text = [text]
+
         if self.tokenizer is None:
             self.tokenizer = AutoTokenizer.from_pretrained(model_map[self.lang])
 
         if self.model is None:
             self.load_model(from_pt=True)
 
-        encoded_input = self.tokenizer.encode_plus(text, padding=True, truncation=True,
-                                                   max_length=2048, return_tensors='tf')
+        encoded_inputs = [self.tokenizer.encode_plus(sentence, padding=True, truncation=True,
+                                                    max_length=2048, return_tensors='tf') for sentence in text]
 
         with tf.device('/CPU:0'), tf.GradientTape() as tape:
-            output = self.model(encoded_input)
-            logits = output.logits
+            outputs = [self.model(encoded_input) for encoded_input in encoded_inputs]
+            logits = [output.logits for output in outputs]
 
-        probabilities = tf.nn.softmax(logits)
+        probabilities = [tf.nn.softmax(logit) for logit in logits]
 
         if both:
-            return probabilities[0].numpy().tolist()
+            return [probability[0].numpy().tolist() for probability in probabilities]
 
-        predicted_value = probabilities.numpy()[0][await self.find_bullying_index()]
+        predicted_values = [probability.numpy()[0][await self.find_bullying_index()] for probability in probabilities]
 
-        return predicted_value
+        return predicted_values

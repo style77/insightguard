@@ -5,7 +5,7 @@ from starlette.requests import Request
 
 from insightguard.db.dao.key_dao import KeyDAO
 from insightguard.ratelimiter.limiter import RateLimiter
-from insightguard.services.insightguard.model import BullyingScanner
+from insightguard.services.insightguard.models import BullyingScanner
 from insightguard.settings import settings
 from insightguard.web.api.bullying.schema import PredictionOutputDTO, PredictionInputDTO
 
