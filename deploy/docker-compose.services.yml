@@ -1,0 +1,34 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:13.8-bullseye
+    hostname: insightguard-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: "insightguard"
+      POSTGRES_USER: "insightguard"
+      POSTGRES_DB: "insightguard"
+    volumes:
+      - insightguard-db-data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: pg_isready -U insightguard
+      interval: 2s
+      timeout: 3s
+      retries: 40
+
+  redis:
+    image: bitnami/redis:6.2.5
+    hostname: "insightguard-redis"
+    ports:
+      - "6379:6379"
+    restart: always
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+    healthcheck:
+      test: redis-cli ping
+      interval: 1s
+      timeout: 3s
+      retries: 50

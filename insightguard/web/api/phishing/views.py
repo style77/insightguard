@@ -20,13 +20,16 @@ bullying_rate_limiter = RateLimiter(rate_limit=15000, rate_limit_window=86400,
 
 
 @router.post("/url", response_model=List[PhishingURLOutputDTO])
-async def predict_url(input: PhishingURLInputDTO, x_api_key: str = Header(),
+async def predict_url(input: PhishingURLInputDTO,
+                      x_api_key: str = Header(),
                       key_dao: KeyDAO = Depends(),
                       rate_limiter: RateLimiter = Depends(bullying_rate_limiter)):
     """
     Predicts class for input data.
 
     :param input: input data.
+    :param key_dao: key dao.
+    :param rate_limiter: rate limiter.
     :param x_api_key: API key.
 
     :return: prediction output.
@@ -44,7 +47,6 @@ async def predict_url(input: PhishingURLInputDTO, x_api_key: str = Header(),
             "insightguard/services/insightguard/models/phishing.h5")
         prediction = scanner.predict(input.url, normalize=True)
     except Exception as e:
-        print(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error predicting message.",
