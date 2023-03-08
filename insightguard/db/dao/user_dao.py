@@ -7,7 +7,7 @@ from uuid import UUID
 
 from fastapi import Depends
 from fastapi import HTTPException
-from sqlalchemy import select, or_
+from sqlalchemy import select, or_, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 
@@ -96,7 +96,7 @@ class UserDAO:
                           full_name: typing.Optional[str],
                           company: typing.Optional[str]) -> None:
         """
-        Add user to session.
+        Create user model.
 
         :param username: username of a user.
         :param password: password of a user.
@@ -130,11 +130,12 @@ class UserDAO:
         user_context: str = None,
     ) -> UserModelDTO:
         """
-        Get specific user bullying.
+        Get specific user.
 
         :param user_context: username or email of user instance.
         :return: user models.
         """
+
         if '@' in user_context:
             query = select(UserModel).where(UserModel.email == user_context)
         elif is_valid_uuid(user_context):
@@ -194,6 +195,7 @@ class UserDAO:
         :param refresh_token: refresh token.
         :return: JWT token.
         """
+
         try:
             payload = jwt.decode(refresh_token, settings.jwt_refresh_secret_key,
                                  algorithms=[settings.jwt_algorithm])
@@ -213,3 +215,44 @@ class UserDAO:
             access_token=JWT.create_access_token(user_id),
             refresh_token=refresh_token
         )
+
+    async def update_user(self, user_id: str, username: typing.Optional[str],
+                          email: typing.Optional[str],
+                          full_name: typing.Optional[str],
+                          company: typing.Optional[str]) -> UserModelDTO:
+        """
+        Update user.
+
+        :param user_id: id of a user.
+        :param username: username of a user.
+        :param email: email of a user.
+        :param company: company of a user.
+        :param full_name: full_name of a user.
+        """
+
+        # check if user with same username or email exists
+        query = select(UserModel).where(
+            or_(UserModel.username == username,
+                UserModel.email == email)
+        )
+
+        exists = await self.session.execute(query)
+
+        if exists.scalar():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User with same username or email already exists",
+            )
+
+        u = await self.get_user(user_id)
+
+        query = update(UserModel).where(UserModel.id == user_id).values(
+            username=username if username else u.username,
+            email=email if email else u.email,
+            full_name=full_name if full_name else u.full_name,
+            company=company if company else u.company
+        )
+
+        await self.session.execute(query)
+
+        return await self.get_user(user_id)
