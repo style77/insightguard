@@ -1,22 +1,16 @@
 import {useAuth, useRequireAuth} from "../hooks/useAuth";
 import styled from "styled-components";
 
-import {SiDatadog, SiFoodpanda} from "react-icons/si";
-
 import {ReactNode, useEffect, useRef, useState} from "react";
 import {
     AiFillInfoCircle,
     AiOutlineUser,
     IoAnalyticsOutline,
-    IoKeySharp, IoSettingsSharp, GiHouseKeys, IoCloseSharp
+    IoKeySharp, IoSettingsSharp, GiHouseKeys
 } from "react-icons/all";
 import Navbar from "../components/navbar";
-import Modal, {
-    ApiKeysModal,
-    ModalButton,
-    ModalButtons,
-    ModalFooter, ModalFooterCode, ModalFooterLink,
-    ModalForm, NewApiKeyModal
+import {
+    ApiKeysModal, NewApiKeyModal, UserProfileModal
 } from "../components/modal";
 
 const Container = styled.div`
@@ -204,6 +198,10 @@ export default function Dashboard() {
         setModal(<ApiKeysModal setModal={setModal} analytics={true}/>)
     }
 
+    const userProfile = async () => {
+        setModal(<UserProfileModal setModal={setModal}/>)
+    }
+
     return (
         <>
             <Navbar openKeysModal={apiKeys}/>
@@ -242,7 +240,7 @@ export default function Dashboard() {
                             </CardInfoWrapper>
                         </CardContent>
                     </Card>
-                    <Card className="card">
+                    <Card className="card" onClick={userProfile}>
                         <CardContent className="card-content">
                             <CardImage>
                                 <AiOutlineUser className="icon"/>
