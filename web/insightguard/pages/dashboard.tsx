@@ -12,6 +12,7 @@ import Navbar from "../components/navbar";
 import {
     ApiKeysModal, NewApiKeyModal, UserProfileModal
 } from "../components/modal";
+import {useRouter} from "next/navigation";
 
 const Container = styled.div`
   align-items: center;
@@ -168,6 +169,7 @@ export default function Dashboard() {
     useRequireAuth();
 
     const auth = useAuth();
+    const router = useRouter();
 
     const cardsRef = useRef<HTMLDivElement>(null);
 
@@ -272,23 +274,7 @@ export default function Dashboard() {
                             </CardInfoWrapper>
                         </CardContent>
                     </Card>
-                    <Card className="card">
-                        <CardContent className="card-content">
-                            <CardImage>
-                                <IoSettingsSharp className="icon"/>
-                            </CardImage>
-                            <CardInfoWrapper>
-                                <CardInfo>
-                                    <IoSettingsSharp className="icon"/>
-                                    <CardInfoTitle>
-                                        <h3>Settings</h3>
-                                        <h4>Edit settings</h4>
-                                    </CardInfoTitle>
-                                </CardInfo>
-                            </CardInfoWrapper>
-                        </CardContent>
-                    </Card>
-                    <Card className="card">
+                    <Card className="card" onClick={() => router.push('about')}>
                         <CardContent className="card-content">
                             <CardImage>
                                 <AiFillInfoCircle className="icon"/>
