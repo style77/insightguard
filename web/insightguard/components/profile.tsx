@@ -1,13 +1,18 @@
 import styled, {keyframes} from "styled-components";
 import {AiOutlineUser, CiLogout, IoKeySharp, IoSettingsSharp} from "react-icons/all";
-import {useRef, useState} from "react";
+import {HTMLAttributes, useRef, useState} from "react";
 import {GiHouseKeys} from "react-icons/gi";
 import useOnClickOutside from "../hooks/useOnClickOutside";
 import {useAuth, useRequireAuth} from "../hooks/useAuth";
 import {useRouter} from "next/router";
 
 
-const Avatar = styled.div`
+interface AvatarProps extends HTMLAttributes<HTMLDivElement> {
+  active?: boolean;
+}
+
+
+const Avatar = styled.div<AvatarProps>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -39,8 +44,11 @@ const Avatar = styled.div`
   }
 `;
 
-// @ts-ignore
-const Dropdown = styled.div`
+interface ProfileProps extends HTMLAttributes<HTMLDivElement> {
+  active?: boolean;
+}
+
+const Dropdown = styled.div<ProfileProps>`
   position: absolute;
   margin-top: 10px;
   top: 100%;
