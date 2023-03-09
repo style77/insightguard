@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Union, List, Tuple, Set, Dict, Any
 
 import tensorflow as tf
@@ -29,7 +30,7 @@ class SingletonMeta(type):
         return cls._instances[cls]
 
 
-class SingletonMetaWithLang(SingletonMeta):
+class SingletonMetaWithLang(type):
     """
     This is a thread-safe implementation of Singleton, with addition to store instances
     with different languages.
@@ -37,11 +38,12 @@ class SingletonMetaWithLang(SingletonMeta):
     """
 
     _instances = {}
+    _lock: Lock = Lock()
 
     def __call__(cls, lang: str, *args, **kwargs):
         with cls._lock:
             if lang not in cls._instances:
-                instance = super().__call__(*args, **kwargs)
+                instance = super().__call__(lang, *args, **kwargs)
                 cls._instances[lang] = instance
         return cls._instances[lang]
 
@@ -96,38 +98,73 @@ class BullyingScanner(metaclass=SingletonMetaWithLang):
         self.model = TFAutoModelForSequenceClassification.from_pretrained(
             model_map[self.lang], from_pt=from_pt)
 
-    async def predict(self, text: Union[str, List[str]], both: bool = False) -> Union[float, List[float]]:
+    async def predict(self, text: str, both: bool = False) -> Union[float, List[float]]:
         """
         Predict the probability of the input text being a cyberbullying message.
-
         Args:
-            text (Union[str, List[str]]): The text or list of texts to be classified.
-            both (bool): Return one value from bullying or both
-
+            text (str): The text to be classified.
+            both (bool): Return one value from model or both
+            from_pt (bool): Load model from pytorch
         Returns:
             Union[float, List[float]]: The probability of the text being a cyberbullying message.
         """
-        if isinstance(text, str):
-            text = [text]
-
         if self.tokenizer is None:
             self.tokenizer = AutoTokenizer.from_pretrained(model_map[self.lang])
 
         if self.model is None:
             self.load_model(from_pt=True)
 
-        encoded_inputs = [self.tokenizer.encode_plus(sentence, padding=True, truncation=True,
-                                                    max_length=2048, return_tensors='tf') for sentence in text]
+        encoded_input = self.tokenizer.encode_plus(text, padding=True, truncation=True,
+                                                   max_length=2048, return_tensors='tf')
 
         with tf.device('/CPU:0'), tf.GradientTape() as tape:
-            outputs = [self.model(encoded_input) for encoded_input in encoded_inputs]
-            logits = [output.logits for output in outputs]
+            output = self.model(encoded_input)
+            logits = output.logits
 
-        probabilities = [tf.nn.softmax(logit) for logit in logits]
+        probabilities = tf.nn.softmax(logits)
 
         if both:
-            return [probability[0].numpy().tolist() for probability in probabilities]
+            return probabilities[0].numpy().tolist()
 
-        predicted_values = [probability.numpy()[0][await self.find_bullying_index()] for probability in probabilities]
+        predicted_value = probabilities.numpy()[0][await self.find_bullying_index()]
 
-        return predicted_values
+        return predicted_value
+
+
+class PhishingURLClassifier(metaclass=SingletonMeta):
+    def __init__(self, model_path: str = 'models/phishing.h5'):
+        self.tokenizer = Tokenizer(num_words=5000)
+        self.tokenizer.fit_on_texts(data['train']['url'])
+        self.model = tf.keras.models.load_model(model_path)
+
+    @staticmethod
+    def normalize(values):
+        """Refactor values to dict"""
+        urls = values[1]
+        values = [val[1] for val in np.ndarray.tolist(values[0])]
+        now = datetime.now()
+        result = []
+        for url, value in zip(urls, values):
+            result.append({
+                'url': url,
+                'prediction': value,
+                'created_at': now
+            })
+        return result
+
+    def predict(self, urls: Set[str], normalize: bool = True):
+        """
+        Predict phishing urls
+
+        Args:
+            urls (Set[str]): Set of urls to predict
+            normalize (bool): If True, return dict with urls as keys and values as values
+        Returns:
+            Tuple[Set[str], List[float]]: Tuple of urls and values
+        """
+        urls_sequenced = self.tokenizer.texts_to_sequences(urls)
+        urls_sequenced = pad_sequences(urls_sequenced, maxlen=100)
+        values = (self.model.predict(urls_sequenced), urls)
+        if normalize:
+            values = self.normalize(values)
+        return values
