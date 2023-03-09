@@ -2,9 +2,7 @@ from asyncio import current_task
 from typing import Awaitable, Callable
 
 from fastapi import FastAPI
-from prometheus_fastapi_instrumentator.instrumentation import (
-    PrometheusFastApiInstrumentator,
-)
+from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy.ext.asyncio import (
     async_scoped_session,
     async_sessionmaker,
@@ -44,9 +42,9 @@ def setup_prometheus(app: FastAPI) -> None:  # pragma: no cover
 
     :param app: current application.
     """
-    PrometheusFastApiInstrumentator(should_group_status_codes=False).instrument(
-        app,
-    ).expose(app, should_gzip=True, name="prometheus_metrics")
+    Instrumentator(should_group_status_codes=False).instrument(
+        app
+    ).expose(app, should_gzip=True, name="prometheus_metrics", include_in_schema=False)
 
 
 def register_startup_event(
