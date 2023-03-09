@@ -7,10 +7,7 @@ import {FiShield} from "react-icons/all";
 
 import {
     EffectComposer,
-    DepthOfField,
     Bloom,
-    Noise,
-    Vignette
 } from '@react-three/postprocessing'
 
 const LandingPageContainer = styled.div`
@@ -112,9 +109,9 @@ export default function Home() {
                         AI-powered cyberbullying detection API
                     </SubHeading>
                     <Buttons>
-                        <Button onClick={() => router.push('/about')}>Learn
+                        <Button onClick={() => router.push('about')}>Learn
                             more</Button>
-                        <Button onClick={() => router.push('/login')}>Get
+                        <Button onClick={() => router.push('login')}>Get
                             Started</Button>
                     </Buttons>
                 </Heading>

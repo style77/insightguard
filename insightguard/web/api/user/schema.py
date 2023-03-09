@@ -15,6 +15,16 @@ class UserModelInputDTO(BaseModel):
     company: typing.Optional[str] = None
 
 
+class UserPatchModelInputDTO(BaseModel):
+    """DTO for creating new user bullying."""
+
+    username: typing.Optional[str] = None
+    email: typing.Optional[str] = None
+
+    full_name: typing.Optional[str] = None
+    company: typing.Optional[str] = None
+
+
 class UserModelFetchDTO(BaseModel):
     """DTO for fetching user models."""
 

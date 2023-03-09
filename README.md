@@ -49,6 +49,24 @@ But you have to rebuild image every time you modify `poetry.lock` or `pyproject.
 docker-compose -f deploy/docker-compose.yml --project-directory . build
 ```
 
+## Docker+Poetry
+
+This is my favourite way to run the project. It's a combination of docker and poetry.
+
+You can start services with docker using this command:
+
+```bash
+docker-compose -f deploy/docker-compose.services.yml --project-directory . up -d
+```
+
+This command will start the database and redis.
+
+Then you can run the project with poetry:
+
+```bash
+poetry run python -m insightguard
+```
+
 ## Configuration
 
 This application can be configured with environment variables.
