@@ -1,6 +1,9 @@
+import os
 from datetime import datetime
 from typing import Union, List, Tuple, Set, Dict, Any
 
+import nltk as nltk
+import pandas as pd
 import tensorflow as tf
 from keras.preprocessing.text import Tokenizer
 from keras.utils import pad_sequences
@@ -9,6 +12,10 @@ from transformers import AutoTokenizer, TFAutoModelForSequenceClassification
 from threading import Lock, Thread
 import numpy as np
 from datasets import load_dataset
+
+import nltk
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
 
 data = load_dataset("Mitake/PhishingURLsANDBenignURLs")
 
@@ -133,8 +140,6 @@ class BullyingScanner(metaclass=SingletonMetaWithLang):
 
 class PhishingURLClassifier(metaclass=SingletonMeta):
     def __init__(self, model_path: str = 'models/phishing.h5'):
-        self.tokenizer = Tokenizer(num_words=5000)
-        self.tokenizer.fit_on_texts(data['train']['url'])
         self.model = tf.keras.models.load_model(model_path)
 
     @staticmethod
@@ -162,9 +167,59 @@ class PhishingURLClassifier(metaclass=SingletonMeta):
         Returns:
             Tuple[Set[str], List[float]]: Tuple of urls and values
         """
-        urls_sequenced = self.tokenizer.texts_to_sequences(urls)
+        tokenizer = Tokenizer(num_words=10000)
+        tokenizer.fit_on_texts(data['train']['url'])
+
+        urls_sequenced = tokenizer.texts_to_sequences(urls)
         urls_sequenced = pad_sequences(urls_sequenced, maxlen=100)
         values = (self.model.predict(urls_sequenced), urls)
         if normalize:
             values = self.normalize(values)
+        return values
+
+
+nltk.download('stopwords')
+nltk.download('punkt')
+stop_words = set(stopwords.words('english'))
+stemmer = PorterStemmer()
+
+email_data = pd.read_csv('./insightguard/services/insightguard/datasets/fraud_email_.csv')
+
+
+class PhishingEmailClassifier(metaclass=SingletonMeta):
+    def __init__(self, model_path: str = 'models/phishing-email.h5'):
+        self.model = tf.keras.models.load_model(model_path)
+
+        self.tokenizer = Tokenizer(num_words=10000)
+
+        preprocessed_text = email_data['Text'].apply(self.preprocess_text)
+
+
+    def preprocess_text(self, text):
+        if isinstance(text, str):
+            tokens = nltk.word_tokenize(text)
+            tokens = [word for word in tokens if word.lower() not in stop_words]
+            tokens = [stemmer.stem(word) for word in tokens]
+            return ' '.join(tokens)
+        else:
+            return ''
+
+    def predict(self, content: str) -> float:
+        """
+        Predict phishing urls
+
+        Args:
+            content (str): Content of email to predict
+        Returns:
+            float: Value of prediction
+        """
+        content = self.preprocess_text(content)
+
+        self.tokenizer.fit_on_texts([content])
+
+        input_sequence = self.tokenizer.texts_to_sequences([content])
+        input_data = pad_sequences(input_sequence, maxlen=100)
+
+        values = self.model.predict(input_data)[0][0]
+
         return values
