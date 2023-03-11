@@ -7,7 +7,7 @@ const nextConfig = {
     },
 
     env: {
-        API_URL: 'https://api.insightguard.tech',
+        API_URL: 'http://api.insightguard.tech',
     }
 }
 
