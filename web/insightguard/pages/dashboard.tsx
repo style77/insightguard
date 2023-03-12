@@ -258,38 +258,38 @@ export default function Dashboard() {
                             </CardInfoWrapper>
                         </CardContent>
                     </Card>
-                    <Card className="card" onClick={analyticKeys}>
-                        <CardContent className="card-content">
-                            <CardImage>
-                                <IoAnalyticsOutline className="icon"/>
-                            </CardImage>
-                            <CardInfoWrapper>
-                                <CardInfo>
-                                    <IoAnalyticsOutline className="icon"/>
-                                    <CardInfoTitle>
-                                        <h3>Analytics</h3>
-                                        <h4>Monitor you API usage</h4>
-                                    </CardInfoTitle>
-                                </CardInfo>
-                            </CardInfoWrapper>
-                        </CardContent>
-                    </Card>
-                    <Card className="card" onClick={() => router.push('about')}>
-                        <CardContent className="card-content">
-                            <CardImage>
-                                <AiFillInfoCircle className="icon"/>
-                            </CardImage>
-                            <CardInfoWrapper>
-                                <CardInfo>
-                                    <AiFillInfoCircle className="icon"/>
-                                    <CardInfoTitle>
-                                        <h3>About</h3>
-                                        <h4>Learn more about Insight Guard!</h4>
-                                    </CardInfoTitle>
-                                </CardInfo>
-                            </CardInfoWrapper>
-                        </CardContent>
-                    </Card>
+                    {/*<Card className="card" onClick={analyticKeys}>*/}
+                    {/*    <CardContent className="card-content">*/}
+                    {/*        <CardImage>*/}
+                    {/*            <IoAnalyticsOutline className="icon"/>*/}
+                    {/*        </CardImage>*/}
+                    {/*        <CardInfoWrapper>*/}
+                    {/*            <CardInfo>*/}
+                    {/*                <IoAnalyticsOutline className="icon"/>*/}
+                    {/*                <CardInfoTitle>*/}
+                    {/*                    <h3>Analytics</h3>*/}
+                    {/*                    <h4>Monitor you API usage</h4>*/}
+                    {/*                </CardInfoTitle>*/}
+                    {/*            </CardInfo>*/}
+                    {/*        </CardInfoWrapper>*/}
+                    {/*    </CardContent>*/}
+                    {/*</Card>*/}
+                    {/*<Card className="card" onClick={() => router.push('about')}>*/}
+                    {/*    <CardContent className="card-content">*/}
+                    {/*        <CardImage>*/}
+                    {/*            <AiFillInfoCircle className="icon"/>*/}
+                    {/*        </CardImage>*/}
+                    {/*        <CardInfoWrapper>*/}
+                    {/*            <CardInfo>*/}
+                    {/*                <AiFillInfoCircle className="icon"/>*/}
+                    {/*                <CardInfoTitle>*/}
+                    {/*                    <h3>About</h3>*/}
+                    {/*                    <h4>Learn more about Insight Guard!</h4>*/}
+                    {/*                </CardInfoTitle>*/}
+                    {/*            </CardInfo>*/}
+                    {/*        </CardInfoWrapper>*/}
+                    {/*    </CardContent>*/}
+                    {/*</Card>*/}
                 </Cards>
             </Container>
         </>
