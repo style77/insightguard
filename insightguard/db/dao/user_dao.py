@@ -1,3 +1,4 @@
+import re
 import time
 
 import redis.asyncio as redis
@@ -33,7 +34,7 @@ async def get_login_attempts(r: Redis, ip_address: str) -> int:
     return int(attempts)
 
 
-async def get_user_jailed_time(r: Redis, ip_address: str) -> float | None:
+async def get_user_jailed_time(r: Redis, ip_address: str) -> typing.Optional[float]:
     jailed_time = await r.get(f'jailed_users:{ip_address}')
     if jailed_time is None:
         return None
