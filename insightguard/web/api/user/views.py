@@ -1,23 +1,20 @@
-import typing
-import uuid
-from typing import List
-
-from fastapi import HTTPException, APIRouter
-from fastapi.openapi.models import Response
+from fastapi import APIRouter
 from fastapi.param_functions import Depends
 from fastapi.security import OAuth2PasswordRequestForm
-from starlette import status
+from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from insightguard.db.dao.key_dao import KeyDAO
 from insightguard.db.dao.user_dao import UserDAO
+from insightguard.db.models.key_model import KeyModel
 from insightguard.settings import settings
 from insightguard.web.api.key.schema import KeyModelDTD
 from insightguard.web.api.user.schema import (UserModelInputDTO,
-                                              UserModelFetchDTO, UserModelDTO,
+                                              UserModelDTO,
                                               JWTTokenDTD,
-                                              AuthorizeInputDTO, SystemUser)
-from insightguard.web.dependencies import get_current_user
+                                              SystemUser,
+                                              UserPatchModelInputDTO)
+from insightguard.web.dependencies import (get_current_user)
 
 router = APIRouter()
 
@@ -49,20 +46,37 @@ async def create_user_model(
     await user_dao.create_user(**new_user_object.dict())
 
 
+@router.patch('/', response_model=UserModelDTO)
+async def update_user_model(
+    user: SystemUser = Depends(get_current_user),
+    user_dao: UserDAO = Depends(),
+    user_object: UserPatchModelInputDTO = None
+) -> UserModelDTO:
+    """
+    Updates user bullying in the database.
+
+    :param user: user bullying object.
+    :param user_dao: DAO for user models.
+    :param user_object: user bullying object.
+    """
+    return await user_dao.update_user(user.id.__str__(), **user_object.dict())
+
+
 @router.post("/authorize", response_model=JWTTokenDTD)
 async def authorize_user(
+    request: Request,
     user: OAuth2PasswordRequestForm = Depends(),
-    user_dao: UserDAO = Depends()
-) -> JWTTokenDTD:
+    user_dao: UserDAO = Depends(),
+) -> JSONResponse:
     """
     Authorize user and returns JWT token for user.
 
+    :param request: request object.
     :param user: username
     :param user_dao: DAO for user models.
-    :param response: response object.
     :return: JWT tokens for user.
     """
-    jwt = await user_dao.authorize_user(user.username, user.password)
+    jwt = await user_dao.authorize_user(user.username, user.password, request)
 
     response = JSONResponse(content=jwt.dict())
 
@@ -94,10 +108,10 @@ async def authorize_user(
 
 
 @router.post("/refresh", response_model=JWTTokenDTD)
-async def refresh_token(
+async def refresh_token_func(
     refresh_token: str,
     user_dao: UserDAO = Depends(),
-) -> JWTTokenDTD:
+) -> JSONResponse:
     """
     Refresh access token using refresh token.
 
@@ -112,7 +126,7 @@ async def refresh_token(
     # Set new access token in cookie
     response.set_cookie(
         key="access_token",
-        value=jwt,
+        value=jwt.access_token,
         max_age=settings.access_token_expire_minutes,
         httponly=True,
         secure=True,
@@ -124,6 +138,6 @@ async def refresh_token(
 
 @router.get("/keys", response_model=list[KeyModelDTD])
 async def get_user_keys(user: SystemUser = Depends(get_current_user),
-                        key_dao: KeyDAO = Depends()) -> List[KeyModelDTD]:
+                        key_dao: KeyDAO = Depends()) -> list[KeyModel]:
     keys = await key_dao.get_user_keys(user.id)
     return keys

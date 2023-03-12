@@ -14,3 +14,17 @@ class ProcessTimeHeader(BaseHTTPMiddleware):
         process_time = time.time() - start_time
         response.headers["X-Process-Time"] = str(process_time)
         return response
+
+
+class SecurityHeaders(BaseHTTPMiddleware):
+    def __init__(self, app):
+        super().__init__(app)
+
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "same-origin"
+        response.headers["Content-Security-Policy"] = "default-src 'none'"
+        return response

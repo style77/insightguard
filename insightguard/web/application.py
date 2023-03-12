@@ -6,7 +6,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from insightguard.web.api.router import api_router
 from insightguard.web.lifetime import register_shutdown_event, register_startup_event
-from insightguard.web.middlewares import ProcessTimeHeader
+from insightguard.web.middlewares import (ProcessTimeHeader,
+                                          SecurityHeaders)
 
 
 def get_app() -> FastAPI:
@@ -33,6 +34,7 @@ def get_app() -> FastAPI:
     app.add_middleware(ProcessTimeHeader)
     app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True,
                        allow_methods=["*"], allow_headers=["*"])
+    app.add_middleware(SecurityHeaders)
 
     # Main router for the API.
     app.include_router(router=api_router, prefix="/api")

@@ -1,13 +1,24 @@
 import styled, {keyframes} from "styled-components";
-import {AiOutlineUser, CiLogout, IoKeySharp, IoSettingsSharp} from "react-icons/all";
-import {useRef, useState} from "react";
+import {
+    AiOutlineDashboard,
+    AiOutlineUser,
+    CiLogout,
+    IoKeySharp,
+    IoSettingsSharp
+} from "react-icons/all";
+import {HTMLAttributes, useRef, useState} from "react";
 import {GiHouseKeys} from "react-icons/gi";
 import useOnClickOutside from "../hooks/useOnClickOutside";
 import {useAuth, useRequireAuth} from "../hooks/useAuth";
 import {useRouter} from "next/router";
 
 
-const Avatar = styled.div`
+interface AvatarProps extends HTMLAttributes<HTMLDivElement> {
+    active?: boolean;
+}
+
+
+const Avatar = styled.div<AvatarProps>`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -39,8 +50,11 @@ const Avatar = styled.div`
   }
 `;
 
-// @ts-ignore
-const Dropdown = styled.div`
+interface ProfileProps extends HTMLAttributes<HTMLDivElement> {
+    active?: boolean;
+}
+
+const Dropdown = styled.div<ProfileProps>`
   position: absolute;
   margin-top: 10px;
   top: 100%;
@@ -186,19 +200,35 @@ const Profile = ({landing, openKeysModal, openProfileModal, openSettingsModal}) 
                         <DropdownUsername className="dropdown-username">
                             {auth.user.username}
                         </DropdownUsername>
-                        <DropdownItem className="dropdown-item" onClick={openKeysModal}>
-                            <DropdownIcon><IoKeySharp/></DropdownIcon>
-                            Keys
-                        </DropdownItem>
-                        <DropdownItem className="dropdown-item" onClick={openProfileModal}>
-                            <DropdownIcon><AiOutlineUser/></DropdownIcon>
-                            Profile
-                        </DropdownItem>
-                        <DropdownItem className="dropdown-item" onClick={openSettingsModal}>
-                            <DropdownIcon><IoSettingsSharp/></DropdownIcon>
-                            Settings
-                        </DropdownItem>
-                        <DropdownItem className="dropdown-item" onClick={() => auth.logout()}>
+                        {router.route == "/dashboard" ?
+                            (<>
+                                <DropdownItem className="dropdown-item"
+                                              onClick={openKeysModal}>
+                                    <DropdownIcon><IoKeySharp/></DropdownIcon>
+                                    Keys
+                                </DropdownItem>
+                                <DropdownItem className="dropdown-item"
+                                              onClick={openProfileModal}>
+                                    <DropdownIcon><AiOutlineUser/></DropdownIcon>
+                                    Profile
+                                </DropdownItem>
+                                <DropdownItem className="dropdown-item"
+                                              onClick={openSettingsModal}>
+                                    <DropdownIcon><IoSettingsSharp/></DropdownIcon>
+                                    Settings
+                                </DropdownItem>
+                            </>) : (
+                                <>
+                                    <DropdownItem className="dropdown-item"
+                                                  onClick={() => router.push("/dashboard")}>
+                                        <DropdownIcon><AiOutlineDashboard/></DropdownIcon>
+                                        Dashboard
+                                    </DropdownItem>
+                                </>
+                            )
+                        }
+                        <DropdownItem className="dropdown-item"
+                                      onClick={() => auth.logout()}>
                             <DropdownIcon><CiLogout/></DropdownIcon>
                             Logout
                         </DropdownItem>

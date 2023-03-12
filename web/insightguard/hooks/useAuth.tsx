@@ -42,6 +42,7 @@ function useProvideAuth() {
                 let user = await res.json();
                 user.accessToken = tokens.access_token;
                 user.refreshToken = tokens.refresh_token;
+                user.fullName = user.full_name;
                 localStorage.setItem('accessToken', tokens.access_token)
                 localStorage.setItem('refreshToken', tokens.refresh_token)
                 setUser(user);
@@ -114,6 +115,7 @@ function useProvideAuth() {
 
     return {
         user,
+        setUser,
         signin,
         signinWithToken,
         signup,

@@ -1,23 +1,18 @@
 import {useAuth, useRequireAuth} from "../hooks/useAuth";
 import styled from "styled-components";
 
-import {SiDatadog, SiFoodpanda} from "react-icons/si";
-
 import {ReactNode, useEffect, useRef, useState} from "react";
 import {
     AiFillInfoCircle,
     AiOutlineUser,
     IoAnalyticsOutline,
-    IoKeySharp, IoSettingsSharp, GiHouseKeys, IoCloseSharp
+    IoKeySharp, IoSettingsSharp, GiHouseKeys
 } from "react-icons/all";
 import Navbar from "../components/navbar";
-import Modal, {
-    ApiKeysModal,
-    ModalButton,
-    ModalButtons,
-    ModalFooter, ModalFooterCode, ModalFooterLink,
-    ModalForm, NewApiKeyModal
+import {
+    ApiKeysModal, NewApiKeyModal, UserProfileModal
 } from "../components/modal";
+import {useRouter} from "next/navigation";
 
 const Container = styled.div`
   align-items: center;
@@ -174,6 +169,7 @@ export default function Dashboard() {
     useRequireAuth();
 
     const auth = useAuth();
+    const router = useRouter();
 
     const cardsRef = useRef<HTMLDivElement>(null);
 
@@ -202,6 +198,10 @@ export default function Dashboard() {
 
     const analyticKeys = async () => {
         setModal(<ApiKeysModal setModal={setModal} analytics={true}/>)
+    }
+
+    const userProfile = async () => {
+        setModal(<UserProfileModal setModal={setModal}/>)
     }
 
     return (
@@ -242,7 +242,7 @@ export default function Dashboard() {
                             </CardInfoWrapper>
                         </CardContent>
                     </Card>
-                    <Card className="card">
+                    <Card className="card" onClick={userProfile}>
                         <CardContent className="card-content">
                             <CardImage>
                                 <AiOutlineUser className="icon"/>
@@ -258,54 +258,38 @@ export default function Dashboard() {
                             </CardInfoWrapper>
                         </CardContent>
                     </Card>
-                    <Card className="card" onClick={analyticKeys}>
-                        <CardContent className="card-content">
-                            <CardImage>
-                                <IoAnalyticsOutline className="icon"/>
-                            </CardImage>
-                            <CardInfoWrapper>
-                                <CardInfo>
-                                    <IoAnalyticsOutline className="icon"/>
-                                    <CardInfoTitle>
-                                        <h3>Analytics</h3>
-                                        <h4>Monitor you API usage</h4>
-                                    </CardInfoTitle>
-                                </CardInfo>
-                            </CardInfoWrapper>
-                        </CardContent>
-                    </Card>
-                    <Card className="card">
-                        <CardContent className="card-content">
-                            <CardImage>
-                                <IoSettingsSharp className="icon"/>
-                            </CardImage>
-                            <CardInfoWrapper>
-                                <CardInfo>
-                                    <IoSettingsSharp className="icon"/>
-                                    <CardInfoTitle>
-                                        <h3>Settings</h3>
-                                        <h4>Edit settings</h4>
-                                    </CardInfoTitle>
-                                </CardInfo>
-                            </CardInfoWrapper>
-                        </CardContent>
-                    </Card>
-                    <Card className="card">
-                        <CardContent className="card-content">
-                            <CardImage>
-                                <AiFillInfoCircle className="icon"/>
-                            </CardImage>
-                            <CardInfoWrapper>
-                                <CardInfo>
-                                    <AiFillInfoCircle className="icon"/>
-                                    <CardInfoTitle>
-                                        <h3>About</h3>
-                                        <h4>Learn more about Insight Guard!</h4>
-                                    </CardInfoTitle>
-                                </CardInfo>
-                            </CardInfoWrapper>
-                        </CardContent>
-                    </Card>
+                    {/*<Card className="card" onClick={analyticKeys}>*/}
+                    {/*    <CardContent className="card-content">*/}
+                    {/*        <CardImage>*/}
+                    {/*            <IoAnalyticsOutline className="icon"/>*/}
+                    {/*        </CardImage>*/}
+                    {/*        <CardInfoWrapper>*/}
+                    {/*            <CardInfo>*/}
+                    {/*                <IoAnalyticsOutline className="icon"/>*/}
+                    {/*                <CardInfoTitle>*/}
+                    {/*                    <h3>Analytics</h3>*/}
+                    {/*                    <h4>Monitor you API usage</h4>*/}
+                    {/*                </CardInfoTitle>*/}
+                    {/*            </CardInfo>*/}
+                    {/*        </CardInfoWrapper>*/}
+                    {/*    </CardContent>*/}
+                    {/*</Card>*/}
+                    {/*<Card className="card" onClick={() => router.push('about')}>*/}
+                    {/*    <CardContent className="card-content">*/}
+                    {/*        <CardImage>*/}
+                    {/*            <AiFillInfoCircle className="icon"/>*/}
+                    {/*        </CardImage>*/}
+                    {/*        <CardInfoWrapper>*/}
+                    {/*            <CardInfo>*/}
+                    {/*                <AiFillInfoCircle className="icon"/>*/}
+                    {/*                <CardInfoTitle>*/}
+                    {/*                    <h3>About</h3>*/}
+                    {/*                    <h4>Learn more about Insight Guard!</h4>*/}
+                    {/*                </CardInfoTitle>*/}
+                    {/*            </CardInfo>*/}
+                    {/*        </CardInfoWrapper>*/}
+                    {/*    </CardContent>*/}
+                    {/*</Card>*/}
                 </Cards>
             </Container>
         </>

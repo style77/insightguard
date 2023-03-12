@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from insightguard.services.insightguard.model import BullyingScanner
+from insightguard.services.insightguard.models import BullyingScanner
 
 
 def init_models(app: FastAPI) -> None:

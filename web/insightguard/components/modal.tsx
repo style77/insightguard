@@ -3,9 +3,8 @@ import useOnClickOutside from "../hooks/useOnClickOutside";
 import {ReactNode, useEffect, useRef, useState} from "react";
 import {useAuth} from "../hooks/useAuth";
 import {
-    AiFillWarning,
     BsKeyFill,
-    FaEye, FaTrash,
+    FaEye,
     FiLock, FiUnlock,
     HiOutlineClipboardCopy,
     IoAnalyticsOutline
@@ -123,13 +122,14 @@ export const ModalForm = styled.form`
     border-radius: 10px;
     padding: 8px;
     background-color: rgba(255, 255, 255, 0.1);
-    color: #fff;
+    color: rgb(255, 255, 255, 0.8);
     font-size: 16px;
     font-weight: 400;
     transition: background-color 250ms;
 
     &:focus {
       background-color: rgba(255, 255, 255, 0.2);
+      color: #fefefe;
     }
 
     &::placeholder {
@@ -149,6 +149,11 @@ export const ModalForm = styled.form`
     }
 
     &::-webkit-input-placeholder {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    &:disabled {
+      background-color: rgba(255, 255, 255, 0.05);
       color: rgba(255, 255, 255, 0.5);
     }
   }
@@ -240,7 +245,7 @@ const Modal = ({children, onClose, title, description}: ModalProps) => {
     )
 }
 
-const CopiedText = styled.div`
+const Popup = styled.div`
   position: absolute;
   top: 0;
   left: 0;
@@ -319,12 +324,12 @@ export const NewApiKeyModal = ({setModal}) => {
             </ModalButtons>
             {newKey && (
                 <>
-                    {copied && <CopiedText><HiOutlineClipboardCopy/>Copied to clipboard!</CopiedText>}
+                    {copied && <Popup><HiOutlineClipboardCopy/>Copied to clipboard!</Popup>}
                     <ModalFooter>
                         <p>Your new API key: <ModalFooterCode
                             onClick={copyToClipboard}>{newKey}</ModalFooterCode></p>
                         <p>To learn how to use it please check <ModalFooterLink
-                            href="/documentation">documentation</ModalFooterLink></p>
+                            href={`${process.env.API_URL}/api/docs`}>documentation</ModalFooterLink></p>
                     </ModalFooter>
                 </>
             )}
@@ -541,13 +546,13 @@ export const ApiKeyCard = ({
     return (
         <>
             {copied &&
-                <CopiedText><HiOutlineClipboardCopy/>Copied to clipboard!</CopiedText>
+                <Popup><HiOutlineClipboardCopy/>Copied to clipboard!</Popup>
             }
             {
                 showUnlockConfirmation && (
                     <ModalBase>
                         {unlocked &&
-                            <CopiedText>Unlocked key!</CopiedText>
+                            <Popup>Unlocked key!</Popup>
                         }
                         <ConfirmModal ref={confirmModalRef}>
                             <ModalTitle>
@@ -572,7 +577,7 @@ export const ApiKeyCard = ({
                 showLockConfirmation && (
                     <ModalBase>
                         {locked &&
-                            <CopiedText>Locked key!</CopiedText>
+                            <Popup>Locked key!</Popup>
                         }
                         <ConfirmModal ref={confirmModalRef}>
                             <ModalTitle>
@@ -611,7 +616,8 @@ export const ApiKeyCard = ({
                         )}</ModalFooterCode>
                     </KeyHeader>
                     <ModalDate>
-                        Created at {new Date(data.created_at).toLocaleString()} {analytics && `• Total usage: ${data.usage}`} {data.disabled && `• Disabled`}
+                        Created
+                        at {new Date(data.created_at).toLocaleString()} {analytics && `• Total usage: ${data.usage}`} {data.disabled && `• Disabled`}
                     </ModalDate>
                 </KeyHeaderContainer>
                 <KeyContainerUtils>
@@ -635,7 +641,7 @@ export const ApiKeyCard = ({
     )
 }
 
-export const ApiKeysModal = ({setModal, analytics=false}) => {
+export const ApiKeysModal = ({setModal, analytics = false}) => {
     const auth = useAuth();
 
     // We don't have to secure keys in state, because Next.js handles it for us
@@ -669,7 +675,8 @@ export const ApiKeysModal = ({setModal, analytics=false}) => {
     }, [auth.user.accessToken])
 
     return (
-        <Modal onClose={() => setModal(null)} title={analytics ? "API keys analytics" : "API keys"}
+        <Modal onClose={() => setModal(null)}
+               title={analytics ? "API keys analytics" : "API keys"}
                description={analytics ? "Choose API key to analyze" : "Manage your API keys"}>
             {loading ? (
                 <ModalKeys>
@@ -682,7 +689,8 @@ export const ApiKeysModal = ({setModal, analytics=false}) => {
                     {apiKeys.length > 0 ? (
                         <ModalKeys>
                             {apiKeys.map(key => (
-                                <ApiKeyCard key={key.id} keyData={key} analytics={analytics}/>
+                                <ApiKeyCard key={key.id} keyData={key}
+                                            analytics={analytics}/>
                             ))}
                         </ModalKeys>
                     ) : (
@@ -695,6 +703,98 @@ export const ApiKeysModal = ({setModal, analytics=false}) => {
                     )}</>
             )}
         </Modal>
+    )
+}
+
+const ModalError = styled.p`
+  color: #ff0000;
+  font-size: 14px;
+  margin-top: 10px;
+`
+
+export const UserProfileModal = ({setModal}) => {
+    const auth = useAuth();
+
+    const fullNameRef = useRef(null);
+    const companyRef = useRef(null);
+    const usernameRef = useRef(null);
+    const emailRef = useRef(null);
+
+    const errorRef = useRef(null);
+    const [updated, setUpdated] = useState(false);
+
+    const updateProfile = async () => {
+        let data = {}
+        fullNameRef.current.value != auth.user.fullName ? data["full_name"] = fullNameRef.current.value : null
+        companyRef.current.value != auth.user.company ? data["company"] = companyRef.current.value : null
+        usernameRef.current.value != auth.user.username ? data["username"] = usernameRef.current.value : null
+        emailRef.current.value != auth.user.email ? data["email"] = emailRef.current.value : null
+        const res = await fetch(process.env.API_URL + "/api/user/", {
+            method: "PATCH",
+            headers: {
+                "Authorization": "Bearer " + auth.user.accessToken,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(data)
+        })
+
+        if (res.status === 200) {
+            const data = await res.json();
+
+            let newUser = auth.user;
+            newUser.fullName = fullNameRef.current.value;
+            newUser.company = companyRef.current.value;
+            newUser.username = usernameRef.current.value;
+            newUser.email = emailRef.current.value;
+
+            auth.setUser(newUser);
+            setUpdated(true)
+            setInterval(() => {
+                setUpdated(false)
+            }, 1000)
+        } else {
+            const data = await res.json();
+            console.log(data)
+            errorRef.current.innerText = data.detail;
+        }
+    }
+
+    return (
+        <>
+            {updated &&
+                <Popup>Updated account!</Popup>
+            }
+            <Modal onClose={() => setModal(null)} title="User profile"
+                   description="Manage your account">
+                <ModalForm>
+                    <label htmlFor="username">Username</label>
+                    <input type="text" id="username" placeholder="Username"
+                           value={auth.user.username} ref={usernameRef} required
+                           disabled/>
+                </ModalForm>
+                <ModalForm>
+                    <label htmlFor="email">E-mail</label>
+                    <input type="email" id="email" placeholder="E-mail"
+                           value={auth.user.email} ref={emailRef} required disabled/>
+                </ModalForm>
+                <ModalForm>
+                    <label htmlFor="fullname">Full name</label>
+                    <input type="text" id="fullname" placeholder="Full Name"
+                           value={auth.user.fullName} ref={fullNameRef}/>
+                </ModalForm>
+                <ModalForm>
+                    <label htmlFor="company">Company</label>
+                    <input type="email" id="company" placeholder="Company"
+                           value={auth.user.company} ref={companyRef}/>
+                </ModalForm>
+                <ModalButtons>
+                    <ModalButton onClick={() => setModal(null)}>Cancel</ModalButton>
+                    <ModalButton onClick={() => updateProfile()}>Update</ModalButton>
+                </ModalButtons>
+
+                <ModalError ref={errorRef}/>
+            </Modal>
+        </>
     )
 }
 

@@ -1,19 +1,11 @@
-from datetime import datetime
-
-import redis.asyncio as redis
-from fastapi import HTTPException, Depends, FastAPI
-from fastapi.security import HTTPBearer, OAuth2PasswordBearer
+import jose
+from fastapi import HTTPException, Depends
+from fastapi.security import OAuth2PasswordBearer
 from jose import jwt
-from pydantic import ValidationError
-from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
 from starlette.requests import Request
 
-from insightguard.db.dao.key_dao import KeyDAO
 from insightguard.db.dao.user_dao import UserDAO
-from insightguard.db.dependencies import get_db_session
-from insightguard.db.models.key_model import KeyModel
-from insightguard.db.models.user_model import UserModel
 from insightguard.settings import settings
 from insightguard.web.api.schema import TokenPayload
 from insightguard.web.api.user.schema import UserModelDTO
@@ -22,6 +14,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/user/authorize")
 
 
 async def get_current_user(
+    request: Request,
     token: str = Depends(oauth2_scheme),
     user_dao: UserDAO = Depends()
 ) -> UserModelDTO:
@@ -29,13 +22,24 @@ async def get_current_user(
     Get current user from database.
 
     :param token: JWT token.
+    :param request: request object.
     :param user_dao: DAO for user bullying.
     :return: current user.
     """
     # decode JWT token and extract user ID
-    payload = jwt.decode(
-        token, settings.jwt_secret_key, algorithms=["HS256"]
-    )
+
+    try:
+        payload = jwt.decode(
+            token, settings.jwt_secret_key, algorithms=["HS256"]
+        )
+    except jose.exceptions.ExpiredSignatureError:
+        if request.cookies.get("refresh_token"):
+            payload = await user_dao.refresh_token(request.cookies.get("refresh_token"))
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token",
+            )
     token_data = TokenPayload(**payload)
     user_id = token_data.sub
 
