@@ -67,6 +67,10 @@ class Settings(BaseSettings):
     refresh_token_expire_minutes: int = 60 * 24 * 7
     access_token_expire_minutes: int = 30
 
+    # Jail settings
+    jail_time: int = 20
+    max_login_attempts: int = 3
+
     @property
     def db_url(self) -> URL:
         """

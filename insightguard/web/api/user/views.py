@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 from fastapi.param_functions import Depends
 from fastapi.security import OAuth2PasswordRequestForm
+from starlette.requests import Request
 from starlette.responses import JSONResponse
 
 from insightguard.db.dao.key_dao import KeyDAO
@@ -9,11 +10,11 @@ from insightguard.db.models.key_model import KeyModel
 from insightguard.settings import settings
 from insightguard.web.api.key.schema import KeyModelDTD
 from insightguard.web.api.user.schema import (UserModelInputDTO,
-                                              UserModelFetchDTO, UserModelDTO,
+                                              UserModelDTO,
                                               JWTTokenDTD,
-                                              AuthorizeInputDTO, SystemUser,
+                                              SystemUser,
                                               UserPatchModelInputDTO)
-from insightguard.web.dependencies import get_current_user
+from insightguard.web.dependencies import (get_current_user)
 
 router = APIRouter()
 
@@ -63,17 +64,19 @@ async def update_user_model(
 
 @router.post("/authorize", response_model=JWTTokenDTD)
 async def authorize_user(
+    request: Request,
     user: OAuth2PasswordRequestForm = Depends(),
-    user_dao: UserDAO = Depends()
+    user_dao: UserDAO = Depends(),
 ) -> JSONResponse:
     """
     Authorize user and returns JWT token for user.
 
+    :param request: request object.
     :param user: username
     :param user_dao: DAO for user models.
     :return: JWT tokens for user.
     """
-    jwt = await user_dao.authorize_user(user.username, user.password)
+    jwt = await user_dao.authorize_user(user.username, user.password, request)
 
     response = JSONResponse(content=jwt.dict())
 

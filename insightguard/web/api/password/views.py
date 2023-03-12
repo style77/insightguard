@@ -71,6 +71,17 @@ async def generate_password(password: PasswordGenerateDTD,
     :return: prediction output.
     """
 
+    if password.length < 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password length should be greater than 6.",
+        )
+    elif password.length > 32:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password length should be less than 32.",
+        )
+
     key = await key_dao.get_key(x_api_key)
     if not key:
         raise HTTPException(
