@@ -329,7 +329,7 @@ export const NewApiKeyModal = ({setModal}) => {
                         <p>Your new API key: <ModalFooterCode
                             onClick={copyToClipboard}>{newKey}</ModalFooterCode></p>
                         <p>To learn how to use it please check <ModalFooterLink
-                            href="/documentation">documentation</ModalFooterLink></p>
+                            href={`${process.env.API_URL}/api/docs`}>documentation</ModalFooterLink></p>
                     </ModalFooter>
                 </>
             )}
