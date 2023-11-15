@@ -139,5 +139,4 @@ async def refresh_token_func(
 @router.get("/keys", response_model=list[KeyModelDTD])
 async def get_user_keys(user: SystemUser = Depends(get_current_user),
                         key_dao: KeyDAO = Depends()) -> list[KeyModel]:
-    keys = await key_dao.get_user_keys(user.id)
-    return keys
+    return await key_dao.get_user_keys(user.id)

@@ -94,9 +94,7 @@ class Settings(BaseSettings):
 
         :return: redis URL.
         """
-        path = ""
-        if self.redis_base is not None:
-            path = f"/{self.redis_base}"
+        path = f"/{self.redis_base}" if self.redis_base is not None else ""
         return URL.build(
             scheme="redis",
             host=self.redis_host,

@@ -43,6 +43,4 @@ async def get_current_user(
     token_data = TokenPayload(**payload)
     user_id = token_data.sub
 
-    user = await user_dao.get_user(user_id)
-
-    return user
+    return await user_dao.get_user(user_id)

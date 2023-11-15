@@ -92,11 +92,9 @@ class BullyingScanner(metaclass=SingletonMetaWithLang):
         vals = await self.predict(sentence, both=True)
 
         if len(vals) == 2:
-            i = 0 if vals[0] > vals[1] else 1
+            return 0 if vals[0] > vals[1] else 1
         else:
-            i = 0
-
-        return i
+            return 0
 
     def load_model(self, from_pt: bool):
         """
@@ -133,9 +131,7 @@ class BullyingScanner(metaclass=SingletonMetaWithLang):
         if both:
             return probabilities[0].numpy().tolist()
 
-        predicted_value = probabilities.numpy()[0][await self.find_bullying_index()]
-
-        return predicted_value
+        return probabilities.numpy()[0][await self.find_bullying_index()]
 
 
 class PhishingURLClassifier(metaclass=SingletonMeta):
@@ -148,14 +144,10 @@ class PhishingURLClassifier(metaclass=SingletonMeta):
         urls = values[1]
         values = [val[1] for val in np.ndarray.tolist(values[0])]
         now = datetime.now()
-        result = []
-        for url, value in zip(urls, values):
-            result.append({
-                'url': url,
-                'prediction': value,
-                'created_at': now
-            })
-        return result
+        return [
+            {'url': url, 'prediction': value, 'created_at': now}
+            for url, value in zip(urls, values)
+        ]
 
     def predict(self, urls: Set[str], normalize: bool = True):
         """
@@ -220,6 +212,4 @@ class PhishingEmailClassifier(metaclass=SingletonMeta):
         input_sequence = self.tokenizer.texts_to_sequences([content])
         input_data = pad_sequences(input_sequence, maxlen=100)
 
-        values = self.model.predict(input_data)[0][0]
-
-        return values
+        return self.model.predict(input_data)[0][0]
