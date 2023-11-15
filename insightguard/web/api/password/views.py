@@ -13,12 +13,8 @@ router = APIRouter()
 
 
 def password_strength_detect(password):
-    score = 0
     length = len(password)
-    if length < 12:
-        score += 1
-    else:
-        score += 2
+    score = 0 + (1 if length < 12 else 2)
     import re
     if re.search(r'[a-z]', password):
         score += 1

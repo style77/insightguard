@@ -29,16 +29,12 @@ JAIL_TIME_SECONDS = settings.jail_time
 
 async def get_login_attempts(r: Redis, ip_address: str) -> int:
     attempts = await r.get(f'login_attempts:{ip_address}')
-    if attempts is None:
-        return 0
-    return int(attempts)
+    return 0 if attempts is None else int(attempts)
 
 
 async def get_user_jailed_time(r: Redis, ip_address: str) -> typing.Optional[float]:
     jailed_time = await r.get(f'jailed_users:{ip_address}')
-    if jailed_time is None:
-        return None
-    return float(jailed_time)
+    return None if jailed_time is None else float(jailed_time)
 
 
 async def reset_login_attempts(r: Redis, ip_address: str):
@@ -87,9 +83,9 @@ class JWT:
             minutes=settings.access_token_expire_minutes)
 
         to_encode = {"exp": expires_delta, "sub": str(subject)}
-        encoded_jwt = jwt.encode(to_encode, settings.jwt_secret_key,
-                                 settings.jwt_algorithm)
-        return encoded_jwt
+        return jwt.encode(
+            to_encode, settings.jwt_secret_key, settings.jwt_algorithm
+        )
 
     @staticmethod
     def create_refresh_token(subject: typing.Union[str, typing.Any]) -> str:
@@ -97,9 +93,9 @@ class JWT:
             minutes=settings.refresh_token_expire_minutes)
 
         to_encode = {"exp": expires_delta, "sub": str(subject)}
-        encoded_jwt = jwt.encode(to_encode, settings.jwt_refresh_secret_key,
-                                 settings.jwt_algorithm)
-        return encoded_jwt
+        return jwt.encode(
+            to_encode, settings.jwt_refresh_secret_key, settings.jwt_algorithm
+        )
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -180,13 +176,13 @@ class UserDAO:
             query = select(UserModel).where(UserModel.username == user_context)
 
         user = await self.session.execute(query)
-        user = user.scalar()
-        if not user:
+        if user := user.scalar():
+            return UserModelDTO.from_orm(user)
+        else:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="User doesn't exists",
             )
-        return UserModelDTO.from_orm(user)
 
     async def authorize_user(self, user_context: str, password: str,
                              request: Request) -> JWTTokenDTD:
@@ -205,10 +201,7 @@ class UserDAO:
         jailed_time = await get_user_jailed_time(redis_client, ip_address)
 
         if jailed_time:
-            raise HTTPException(
-                status_code=403,
-                detail=f'You are jailed.'
-            )
+            raise HTTPException(status_code=403, detail='You are jailed.')
 
         if '@' in user_context:
             query = select(UserModel).where(
@@ -229,18 +222,17 @@ class UserDAO:
         if not Hasher.verify_password(password, user.hashed_password):
             await update_login_attempts(redis_client, ip_address)
             attempts += 1
-            if attempts >= settings.max_login_attempts:
-                await update_login_attempts(redis_client, ip_address)
-                raise HTTPException(
-                    status_code=403,
-                    detail=f'You are jailed for {settings.jail_time} seconds.'
-                )
-            else:
+            if attempts < settings.max_login_attempts:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Incorrect password"
                 )
 
+            await update_login_attempts(redis_client, ip_address)
+            raise HTTPException(
+                status_code=403,
+                detail=f'You are jailed for {settings.jail_time} seconds.'
+            )
         await reset_login_attempts(redis_client, ip_address)
 
         return JWTTokenDTD(

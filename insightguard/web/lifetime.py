@@ -49,7 +49,7 @@ def setup_prometheus(app: FastAPI) -> None:  # pragma: no cover
 
 def register_startup_event(
     app: FastAPI,
-) -> Callable[[], Awaitable[None]]:  # pragma: no cover
+) -> Callable[[], Awaitable[None]]:    # pragma: no cover
     """
     Actions to run on application startup.
 
@@ -66,14 +66,13 @@ def register_startup_event(
         init_redis(app)
         setup_prometheus(app)
         init_models(app)
-        pass  # noqa: WPS420
 
     return _startup
 
 
 def register_shutdown_event(
     app: FastAPI,
-) -> Callable[[], Awaitable[None]]:  # pragma: no cover
+) -> Callable[[], Awaitable[None]]:    # pragma: no cover
     """
     Actions to run on application's shutdown.
 
@@ -86,6 +85,5 @@ def register_shutdown_event(
         await app.state.db_engine.dispose()
 
         await shutdown_redis(app)
-        pass  # noqa: WPS420
 
     return _shutdown

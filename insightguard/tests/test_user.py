@@ -19,7 +19,7 @@ async def test_creation(
     url = fastapi_app.url_path_for("create_user_model")
     test_username = uuid.uuid4().hex
     test_password = uuid.uuid4().hex
-    test_email = uuid.uuid4().hex + "@test.com"
+    test_email = f"{uuid.uuid4().hex}@test.com"
     response = await client.put(
         url,
         json={
